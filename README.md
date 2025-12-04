@@ -1,9 +1,45 @@
-  Cấu trúc thư mục
+Cấu trúc thư mục
 BTL-Database/
-├── frontend/     # React + Tailwind
-├── backend/      # Node.js + Express + MSSQL
+├── frontend/ # React + Tailwind
+├── backend/ # Node.js + Express + MSSQL
 ├── .gitignore
 └── README.md
+
+🧩 Quy tắc làm việc với Git
+
+1. Không push trực tiếp lên main
+
+Branch main đã được bảo vệ (protected).
+🔥 Mọi thay đổi phải thông qua pull request.
+
+2. Tạo branch mới để làm task
+
+Mỗi chức năng / bug / feature → tạo 1 branch riêng:
+
+git checkout -b feature/<ten-task>
+
+Ví dụ:
+
+git checkout -b feature/product-api
+
+3. Commit & push
+   git add .
+   git commit -m "Mô tả rõ ràng về thay đổi"
+   git push -u origin feature/<ten-task>
+
+4. Tạo Pull Request (PR)
+
+Vào GitHub → chọn Pull Requests
+
+Chọn “New pull request”
+
+Chọn branch → merge vào main
+
+Gửi yêu cầu review
+
+5. Không merge khi chưa được approve
+
+Chỉ owner (hoặc người được thêm quyền) được merge.
 
 🚀 Cách chạy dự án
 1️⃣ Clone repo
@@ -17,7 +53,6 @@ npm install
 
 Chạy dev server
 npm run dev
-
 
 Mặc định chạy ở:
 
@@ -40,7 +75,6 @@ JWT_SECRET=your-secret-key
 
 Chạy server
 npm run dev
-
 
 API chạy tại:
 
