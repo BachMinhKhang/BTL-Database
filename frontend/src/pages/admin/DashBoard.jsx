@@ -162,9 +162,9 @@ const DashBoard = () => {
           )}
         </div>
 
-        {/* Biểu đồ Top 10 Sản Phẩm Bán Chạy */}
+        {/* Biểu đồ Các sản Phẩm Bán Chạy */}
         <div className="bg-white p-6 rounded-lg shadow">
-          <h2 className="text-xl font-bold mb-4">Top 10 Sản Phẩm Bán Chạy</h2>
+          <h2 className="text-xl font-bold mb-4">Các Sản Phẩm Bán Chạy</h2>
           {productData.length > 0 ? (
             <ResponsiveContainer width="100%" height={330}>
               <BarChart
@@ -207,7 +207,7 @@ const DashBoard = () => {
 
       {/* ===== BIỂU ĐỒ TRÒN - PHÂN BỐ DOANH THU ===== */}
       <div className="bg-white p-6 rounded-lg shadow">
-        <h2 className="text-xl font-bold mb-4">Phân Bố Doanh Thu Top 5 Sản Phẩm</h2>
+        <h2 className="text-xl font-bold mb-4">Phân Bố Doanh Thu Các Sản Phẩm</h2>
         {productData.length > 0 ? (
           <ResponsiveContainer width="100%" height={300}>
             <PieChart>
