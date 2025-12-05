@@ -7,6 +7,7 @@ import { connectDB } from "./config/database.js";
 import authRoutes from "./routes/authRoutes.js";
 import customerRoutes from "./routes/customerRoutes.js";
 import productRoutes from "./routes/productRoutes.js";
+import reportRoutes from "./routes/reportRoutes.js";
 dotenv.config();
 
 const app = express();
@@ -19,6 +20,7 @@ app.use(express.json());
 app.use("/api/auth", authRoutes);
 app.use("/api/customers", customerRoutes);
 app.use("/api/products", productRoutes);
+app.use("/api/reports", reportRoutes);
 // Health check
 app.get("/api/health", (req, res) => {
   res.status(200).json({ message: "Server is running" });

@@ -8,11 +8,20 @@ const config = {
   user: process.env.DB_USER,
   password: process.env.DB_PASS,
   server: process.env.DB_SERVER,
+  port: parseInt(process.env.DB_PORT || 1433),
   database: process.env.DB_NAME,
   options: {
-    encrypt: true,
+    encrypt: false,
     trustServerCertificate: true,
+    enableArithAbort: true,
   },
+  pool: {
+    max: 10,
+    min: 0,
+    idleTimeoutMillis: 30000
+  },
+  connectionTimeout: 30000,
+  requestTimeout: 30000,
 };
 
 export const connectDB = async () => {

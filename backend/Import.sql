@@ -18,7 +18,7 @@ VALUES
 
 -- NHÂN VIÊN
 (6,'nv_banhang','sales@shop.com','staff123','0900222333',N'Phan Văn Sales',N'Sales',N'Phan Văn',N'Quận 1',N'TP.HCM',N'Văn phòng Cty'),
-(7,'nv_quanly','manager@shop.com','admin123','0900333444',N'Lý Giám Đốc',N'Đốc',N'Lý Giám',N'Quận 1',N'TP.HCM',N'Văn phòng Cty'),
+(7,'nv_quanly','manager@shop.com','manager123','0900333444',N'Lý Giám Đốc',N'Đốc',N'Lý Giám',N'Quận 1',N'TP.HCM',N'Văn phòng Cty'),
 (8,'nv_kho','stock@shop.com','staff123','0900444555',N'Trương Thủ Kho',N'Kho',N'Trương Thủ',N'Thủ Đức',N'TP.HCM',N'Kho tổng'),
 (9,'nv_marketing','mkt@shop.com','staff123','0900999888',N'Vũ Marketing',N'Marketing',N'Vũ',N'Quận 3',N'TP.HCM',N'Team MKT'),
 (10,'nv_it','it@shop.com','staff123','0900555666',N'Nguyễn Công IT',N'IT',N'Nguyễn Công',N'Cầu Giấy',N'TP.HCM',N'Phòng IT');
