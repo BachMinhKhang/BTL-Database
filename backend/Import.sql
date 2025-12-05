@@ -21,12 +21,8 @@ VALUES
 (7,'nv_quanly','manager@shop.com','admin123','0900333444',N'Lý Giám Đốc',N'Đốc',N'Lý Giám',N'Quận 1',N'TP.HCM',N'Văn phòng Cty'),
 (8,'nv_kho','stock@shop.com','staff123','0900444555',N'Trương Thủ Kho',N'Kho',N'Trương Thủ',N'Thủ Đức',N'TP.HCM',N'Kho tổng'),
 (9,'nv_marketing','mkt@shop.com','staff123','0900999888',N'Vũ Marketing',N'Marketing',N'Vũ',N'Quận 3',N'TP.HCM',N'Team MKT'),
-(10,'nv_it','it@shop.com','staff123','0900555666',N'Nguyễn Công IT',N'IT',N'Nguyễn Công',N'Cầu Giấy',N'TP.HCM',N'Phòng IT'),
+(10,'nv_it','it@shop.com','staff123','0900555666',N'Nguyễn Công IT',N'IT',N'Nguyễn Công',N'Cầu Giấy',N'TP.HCM',N'Phòng IT');
 
--- ĐỐI TÁC (NCC Văn phòng phẩm)
-(11,'ncc_thienlong','contact@thienlong.vn','ncc123','0900111000',N'Tập đoàn Thiên Long',N'Long',N'Thiên',N'Tân Tạo',N'TP.HCM',N'KCN Tân Tạo'),
-(12,'ncc_doublea','contact@doublea.vn','ncc123','0900222000',N'Double A Việt Nam',N'A',N'Double',N'Biên Hòa',N'Đồng Nai',N'KCN Amata'),
-(13,'shipper_nhanh','ship@fast.com','ship123','0900666777',N'Giao Hàng Nhanh',N'Nhanh',N'Giao Hàng',N'Tân Bình',N'TP.HCM',N'Kho GHN');
 SET IDENTITY_INSERT [USER] OFF;
 GO
 
