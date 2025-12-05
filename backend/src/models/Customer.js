@@ -22,24 +22,43 @@ class Customer {
     return result.recordset;
   }
 
-  // 3. Cập nhật (Gọi SP_UpdateCustomer)
-  static async update(id, { fullName, email, loyaltyPoint }) {
+  // 3. Cập nhật (Gọi sp_UpdateUser)
+  static async update({
+    userId,
+    username,
+    email,
+    password,
+    phoneNo = null,
+    fullName = null,
+    firstName = null,
+    lastName = null,
+    district = null,
+    province = null,
+    numAndStreet = null,
+  }) {
     const request = new sql.Request();
-    request.input("UserID", sql.Int, id);
-    request.input("FullName", sql.NVarChar, fullName);
-    request.input("Email", sql.VarChar, email);
-    request.input("LoyaltyPoint", sql.Int, loyaltyPoint);
+    request.input("UserID", sql.Int, userId);
+    request.input("username", sql.VarChar, username);
+    request.input("email", sql.VarChar, email);
+    request.input("password", sql.VarChar, password);
+    request.input("phoneNo", sql.VarChar, phoneNo);
+    request.input("fullName", sql.NVarChar, fullName);
+    request.input("firstName", sql.NVarChar, firstName);
+    request.input("lastName", sql.NVarChar, lastName);
+    request.input("district", sql.NVarChar, district);
+    request.input("province", sql.NVarChar, province);
+    request.input("numAndStreet", sql.NVarChar, numAndStreet);
 
-    await request.execute("SP_UpdateCustomer");
+    await request.execute("sp_UpdateUser");
     return true;
   }
 
-  // 4. Xóa (Gọi SP_DeleteCustomer)
+  // 4. Xóa (Gọi sp_DeleteUser)
   static async delete(id) {
     const request = new sql.Request();
     request.input("UserID", sql.Int, id);
 
-    await request.execute("SP_DeleteCustomer");
+    await request.execute("sp_DeleteUser");
     return true;
   }
 
