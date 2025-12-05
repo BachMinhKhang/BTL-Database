@@ -1,6 +1,24 @@
 import { sql } from "../config/database.js";
 
 class Customer {
+  static async register({ username, email, password, fullName, phone }) {
+    const request = new sql.Request();
+
+    request.input("username", sql.VarChar, username);
+    request.input("email", sql.VarChar, email);
+    // Nếu cần bảo mật, hãy hash password trước khi truyền vào đây
+    request.input("password", sql.VarChar, password); 
+    request.input("phoneNo", sql.VarChar, phone);
+    request.input("fullName", sql.NVarChar, fullName);
+    // Mặc định loyaltyPoint là 0 khi đăng ký mới
+    request.input("loyaltyPoint", sql.Int, 0);
+
+    // Gọi thủ tục sp_InsertCustomer đã định nghĩa trong SQL
+    const result = await request.execute("sp_InsertCustomer");
+    
+    // Trả về dòng dữ liệu user vừa tạo
+    return result.recordset[0];
+  }
   // 1. Lấy tất cả (Gọi SP_GetAllCustomer)
   static async getAll() {
     const request = new sql.Request();
@@ -22,43 +40,24 @@ class Customer {
     return result.recordset;
   }
 
-  // 3. Cập nhật (Gọi sp_UpdateUser)
-  static async update({
-    userId,
-    username,
-    email,
-    password,
-    phoneNo = null,
-    fullName = null,
-    firstName = null,
-    lastName = null,
-    district = null,
-    province = null,
-    numAndStreet = null,
-  }) {
+  // 3. Cập nhật (Gọi SP_UpdateCustomer)
+  static async update(id, { fullName, email, loyaltyPoint }) {
     const request = new sql.Request();
-    request.input("UserID", sql.Int, userId);
-    request.input("username", sql.VarChar, username);
-    request.input("email", sql.VarChar, email);
-    request.input("password", sql.VarChar, password);
-    request.input("phoneNo", sql.VarChar, phoneNo);
-    request.input("fullName", sql.NVarChar, fullName);
-    request.input("firstName", sql.NVarChar, firstName);
-    request.input("lastName", sql.NVarChar, lastName);
-    request.input("district", sql.NVarChar, district);
-    request.input("province", sql.NVarChar, province);
-    request.input("numAndStreet", sql.NVarChar, numAndStreet);
+    request.input("UserID", sql.Int, id);
+    request.input("FullName", sql.NVarChar, fullName);
+    request.input("Email", sql.VarChar, email);
+    request.input("LoyaltyPoint", sql.Int, loyaltyPoint);
 
-    await request.execute("sp_UpdateUser");
+    await request.execute("SP_UpdateCustomer");
     return true;
   }
 
-  // 4. Xóa (Gọi sp_DeleteUser)
+  // 4. Xóa (Gọi SP_DeleteCustomer)
   static async delete(id) {
     const request = new sql.Request();
     request.input("UserID", sql.Int, id);
 
-    await request.execute("sp_DeleteUser");
+    await request.execute("SP_DeleteCustomer");
     return true;
   }
 
