@@ -3,15 +3,10 @@ import Customer from "../models/Customer.js";
 // GET /api/customers
 export const getAllCustomers = async (req, res) => {
   try {
-    const { keyword, minP, maxP } = req.query;
+    const { sortBy, filterType, filterValue } = req.query;
 
     // Nếu có tham số search thì gọi hàm search, không thì gọi getAll
-    let data;
-    if (keyword || minP || maxP) {
-      data = await Customer.search(keyword, minP, maxP);
-    } else {
-      data = await Customer.getAll();
-    }
+    let data = await Customer.getAll(sortBy, filterType, filterValue);
 
     res.json(data);
   } catch (error) {
