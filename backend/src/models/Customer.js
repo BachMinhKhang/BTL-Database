@@ -1,6 +1,24 @@
 import { sql } from "../config/database.js";
 
 class Customer {
+  static async register({ username, email, password, fullName, phone }) {
+    const request = new sql.Request();
+
+    request.input("username", sql.VarChar, username);
+    request.input("email", sql.VarChar, email);
+    // Nếu cần bảo mật, hãy hash password trước khi truyền vào đây
+    request.input("password", sql.VarChar, password); 
+    request.input("phoneNo", sql.VarChar, phone);
+    request.input("fullName", sql.NVarChar, fullName);
+    // Mặc định loyaltyPoint là 0 khi đăng ký mới
+    request.input("loyaltyPoint", sql.Int, 0);
+
+    // Gọi thủ tục sp_InsertCustomer đã định nghĩa trong SQL
+    const result = await request.execute("sp_InsertCustomer");
+    
+    // Trả về dòng dữ liệu user vừa tạo
+    return result.recordset[0];
+  }
   // 1. Lấy tất cả (Gọi SP_GetAllCustomer)
   static async getAll() {
     const request = new sql.Request();
