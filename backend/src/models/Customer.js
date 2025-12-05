@@ -20,23 +20,15 @@ class Customer {
     return result.recordset[0];
   }
   // 1. Lấy tất cả (Gọi SP_GetAllCustomer)
-  static async getAll() {
+  static async getAll(sortBy, filterType, filterValue) {
     const request = new sql.Request();
-    // Execute gọi thủ tục, không viết query thường
+
+    // Truyền tham số (nếu frontend không gửi thì để null/default)
+    request.input("SortBy", sql.VarChar, sortBy || "Spent");
+    request.input("FilterType", sql.VarChar, filterType || null);
+    request.input("FilterValue", sql.Decimal(12, 2), filterValue || 0);
+
     const result = await request.execute("SP_GetAllCustomer");
-    return result.recordset;
-  }
-
-  // 2. Tìm kiếm (Gọi SP_SearchUser)
-  static async search(keyword, minP, maxP) {
-    const request = new sql.Request();
-
-    // Check null để truyền vào SP đúng logic
-    request.input("Keyword", sql.NVarChar, keyword || null);
-    request.input("MinP", sql.Int, minP === "" ? null : minP);
-    request.input("MaxP", sql.Int, maxP === "" ? null : maxP);
-
-    const result = await request.execute("SP_SearchUser");
     return result.recordset;
   }
 
