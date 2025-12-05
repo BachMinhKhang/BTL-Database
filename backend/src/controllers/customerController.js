@@ -1,5 +1,4 @@
 import Customer from "../models/Customer.js";
-
 // GET /api/customers
 export const getAllCustomers = async (req, res) => {
   try {
@@ -21,10 +20,41 @@ export const getAllCustomers = async (req, res) => {
 export const updateCustomer = async (req, res) => {
   try {
     const { id } = req.params;
-    const { fullName, email, loyaltyPoint } = req.body;
+    const {
+      username,
+      email,
+      password,
+      phoneNo,
+      fullName,
+      firstName,
+      lastName,
+      district,
+      province,
+      numAndStreet,
+    } = req.body;
 
-    await Customer.update(id, { fullName, email, loyaltyPoint });
-    res.json({ message: "Cập nhật thành công!" });
+    // Kiểm tra các trường bắt buộc
+    if (!username || !email || !password) {
+      return res.status(400).json({
+        message: "Cần cung cấp username, email và password",
+      });
+    }
+
+    await Customer.update({
+      userId: id,
+      username,
+      email,
+      password,
+      phoneNo,
+      fullName,
+      firstName,
+      lastName,
+      district,
+      province,
+      numAndStreet,
+    });
+
+    res.json({ message: "Cập nhật thông tin thành công!" });
   } catch (error) {
     console.error("Update Error:", error);
     res.status(500).json({ message: "Lỗi cập nhật: " + error.message });
@@ -36,11 +66,11 @@ export const deleteCustomer = async (req, res) => {
   try {
     const { id } = req.params;
     await Customer.delete(id);
-    res.json({ message: "Xóa thành công!" });
+    res.json({ message: "Xóa khách hàng thành công!" });
   } catch (error) {
     // Nếu lỗi FK (ví dụ khách đã mua hàng) thì DB sẽ throw error
     res.status(400).json({
-      message: "Không thể xóa khách hàng này (có thể do ràng buộc dữ liệu)",
+      message: "Không thể xóa khách hàng này (có thể do ràng buộc dữ liệu): " + error.message,
     });
   }
 };

@@ -6,7 +6,8 @@ import { toast } from "react-toastify";
 
 const Login = () => {
   const navigate = useNavigate();
-  const [form, setForm] = useState({ username: "", password: "" }); // DB login bằng email hoặc username đều được, ở đây giữ email
+  // State khởi tạo đúng với logic login
+  const [form, setForm] = useState({ username: "", password: "" });
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
@@ -21,23 +22,25 @@ const Login = () => {
     setLoading(true);
 
     try {
+      // Gọi API login
       const response = await login(form.username, form.password);
-      const user = response.user; // Đảm bảo backend trả về object user có trường role
+      const user = response.user;
 
-      toast.success(`Chào mừng ${user.firstName || user.username}!`);
+      toast.success(`Chào mừng ${user.firstName || user.fullName || user.username}!`);
 
-      // Logic chuyển trang dựa trên DB:
-      // Bảng Customer không có cột role, Employee mới có.
-      // Backend nên trả về 1 trường ảo 'accountType' hoặc check logic dưới:
-      if (user.role && user.role !== "customer") {
-        // Nếu có role và không phải customer -> Là nhân viên/admin
+      // Logic chuyển hướng dựa trên Role từ Database
+      // Database trả về role: 'customer' hoặc 'ProductMgr', 'Sales', v.v...
+      if (user.role && user.role.toLowerCase() !== "customer") {
+        // Nếu là nhân viên/admin -> vào trang quản trị
         navigate("/admin");
       } else {
-        // Là khách hàng
+        // Nếu là khách hàng -> vào trang chủ
         navigate("/");
       }
     } catch (err) {
-      const errorMessage = err.message || "Đăng nhập thất bại!";
+      console.error(err);
+      // Lấy message lỗi từ backend (nếu có)
+      const errorMessage = err.message || "Tên đăng nhập hoặc mật khẩu không đúng!";
       setError(`*${errorMessage}`);
     } finally {
       setLoading(false);
@@ -45,58 +48,73 @@ const Login = () => {
   };
 
   return (
-    <div className="relative">
-      <div className="flex justify-center items-center h-screen bg-gray-200">
-        <div className="w-96 rounded-2xl bg-white p-8 shadow-md">
-          <h2 className="text-2xl text-center font-semibold mb-4">Đăng Nhập</h2>
-          <form onSubmit={handleSubmit} className="flex flex-col gap-5">
+    <div className="relative min-h-screen bg-gray-100 flex justify-center items-center">
+      <div className="w-full max-w-md bg-white rounded-2xl p-8 shadow-lg">
+        <h2 className="text-3xl text-center font-bold text-gray-800 mb-6">Đăng Nhập</h2>
+        
+        <form onSubmit={handleSubmit} className="flex flex-col gap-5">
+          {/* USERNAME INPUT */}
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Tên đăng nhập</label>
             <input
               type="text"
               name="username"
-              placeholder="Tên đăng nhập"
-              className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+              placeholder="Nhập username"
+              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition"
               onChange={handleChange}
               required
-              value={form.email}
+              // [FIX] Sửa lỗi binding nhầm form.email -> form.username
+              value={form.username} 
             />
+          </div>
 
+          {/* PASSWORD INPUT */}
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Mật khẩu</label>
             <div className="relative">
               <input
                 type={showPassword ? "text" : "password"}
                 name="password"
-                placeholder="Mật khẩu"
+                placeholder="Nhập mật khẩu"
                 value={form.password}
                 onChange={handleChange}
                 required
-                className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition pr-10"
               />
               <span
-                className="absolute right-2.5 top-3 cursor-pointer select-none text-gray-500"
+                className="absolute right-3 top-3.5 cursor-pointer text-gray-500 hover:text-gray-700"
                 onClick={() => setShowPassword(!showPassword)}
               >
-                {showPassword ? <HiEyeOff /> : <HiEye />}
+                {showPassword ? <HiEyeOff size={20} /> : <HiEye size={20} />}
               </span>
             </div>
-            <button
-              type="submit"
-              disabled={loading}
-              className="w-full bg-blue-600 hover:bg-blue-700 disabled:bg-gray-400 text-white py-2 rounded-lg transition duration-200 cursor-pointer"
-            >
-              {loading ? "Đang kiểm tra..." : "Đăng nhập"}
-            </button>
-            {error && (
-              <p className="text-red-500 text-xs text-center">{error}</p>
-            )}
-          </form>
-          <p className="text-sm text-center mt-4">
-            Chưa có tài khoản?{" "}
-            <Link to="/register">
-              <span className="text-blue-600 hover:underline">
-                Đăng ký ngay
-              </span>
-            </Link>
-          </p>
-        </div>
+          </div>
+
+          {/* SUBMIT BUTTON */}
+          <button
+            type="submit"
+            disabled={loading}
+            className="w-full bg-blue-600 hover:bg-blue-700 disabled:bg-gray-400 text-white font-semibold py-3 rounded-lg transition duration-200 mt-2"
+          >
+            {loading ? "Đang xử lý..." : "Đăng nhập"}
+          </button>
+
+          {/* ERROR MESSAGE */}
+          {error && (
+            <div className="bg-red-50 border border-red-200 text-red-600 px-4 py-3 rounded text-sm text-center">
+              {error}
+            </div>
+          )}
+        </form>
+
+        <p className="text-sm text-center mt-6 text-gray-600">
+          Chưa có tài khoản?{" "}
+          <Link to="/register">
+            <span className="text-blue-600 font-semibold hover:underline">
+              Đăng ký ngay
+            </span>
+          </Link>
+        </p>
       </div>
     </div>
   );

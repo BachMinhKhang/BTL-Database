@@ -55,6 +55,9 @@ export default function Header() {
           <Link className="hover:text-blue-500 transition" to="/cart">
             Cart
           </Link>
+          <Link className="hover:text-blue-500 transition" to="/profile"> {/*Này bỏ tạm đây, khi nào quẳng chỗ khác thì quẳng =))*/}
+            Profile
+          </Link> 
         </nav>
 
         {/* User Section */}
