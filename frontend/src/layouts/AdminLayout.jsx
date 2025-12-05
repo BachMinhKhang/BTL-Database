@@ -19,7 +19,6 @@ export default function AdminLayout() {
   // Xử lý đăng xuất
   const handleLogout = () => {
     logout();
-    toast.info("Đã đăng xuất");
     navigate("/login");
   };
 
@@ -40,11 +39,6 @@ export default function AdminLayout() {
       path: "/admin/employees",
       label: "Quản lý Nhân viên",
       icon: <HiUserGroup size={20} />,
-    },
-    {
-      path: "/admin/reports",
-      label: "Báo cáo Doanh thu",
-      icon: <HiDocumentReport size={20} />,
     },
   ];
 
@@ -132,7 +126,7 @@ export default function AdminLayout() {
 
           <div className="flex items-center gap-4">
             <span className="text-gray-600 text-sm hidden sm:block">
-              Xin chào, <strong>{user?.fullName || user?.username}</strong>
+              Xin chào, <strong>{user?.firstName || user?.username}</strong>
             </span>
             <button
               onClick={handleLogout}

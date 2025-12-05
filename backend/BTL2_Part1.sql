@@ -10,8 +10,9 @@ END
 CREATE DATABASE [BTL2];
 USE [BTL2];
 GO
+
 /* ===========================
-   0. Nếu cần: xóa các bảng (chạy nếu muốn reset môi trường)
+   0. Xóa bảng cũ (nếu có)
    =========================== */
 IF OBJECT_ID('dbo.RATING','U') IS NOT NULL DROP TABLE dbo.RATING;
 IF OBJECT_ID('dbo.MANAGE','U') IS NOT NULL DROP TABLE dbo.MANAGE;
@@ -33,23 +34,22 @@ IF OBJECT_ID('dbo.CUSTOMER','U') IS NOT NULL DROP TABLE dbo.CUSTOMER;
 IF OBJECT_ID('dbo.[USER]','U') IS NOT NULL DROP TABLE dbo.[USER];
 
 /* ===========================
-   1. TẠO BẢNG
+   1. TẠO BẢNG (Đã update NVARCHAR)
    =========================== */
 
-
-/* USER */
+/* USER: Các trường tên và địa chỉ đổi sang NVARCHAR */
 CREATE TABLE [USER](
     UserID INT IDENTITY(1,1) PRIMARY KEY,
-    username VARCHAR(50) NOT NULL UNIQUE,
+    username VARCHAR(50) NOT NULL UNIQUE, -- Username thường không dấu
     email VARCHAR(100) NOT NULL UNIQUE CHECK (email LIKE '%@%'),
     password VARCHAR(100) NOT NULL CHECK (LEN(password) >= 6),
     phoneNo VARCHAR(20) NULL CHECK (phoneNo NOT LIKE '%[^0-9+]%'),
-    fullName VARCHAR(100) NULL,
-    firstName VARCHAR(50) NULL,
-    lastName VARCHAR(50) NULL,
-    district VARCHAR(50) NULL,
-    province VARCHAR(50) NULL,
-    numAndStreet VARCHAR(100) NULL
+    fullName NVARCHAR(100) NULL,      -- Đã sửa
+    firstName NVARCHAR(50) NULL,      -- Đã sửa
+    lastName NVARCHAR(50) NULL,       -- Đã sửa
+    district NVARCHAR(50) NULL,       -- Đã sửa
+    province NVARCHAR(50) NULL,       -- Đã sửa
+    numAndStreet NVARCHAR(100) NULL   -- Đã sửa
 );
 GO
 
@@ -64,7 +64,7 @@ GO
 /* EMPLOYEE */
 CREATE TABLE EMPLOYEE(
     UserID INT PRIMARY KEY,
-    role VARCHAR(50) NOT NULL,
+    role NVARCHAR(50) NOT NULL, -- Đã sửa
     FOREIGN KEY (UserID) REFERENCES [USER](UserID)
 );
 GO
@@ -72,7 +72,7 @@ GO
 /* CATALOGLIST */
 CREATE TABLE CATALOGLIST(
     catalogID INT IDENTITY(1,1) PRIMARY KEY,
-    catalogName VARCHAR(100) NOT NULL,
+    catalogName NVARCHAR(100) NOT NULL, -- Đã sửa
     parentCatalogID INT NULL,
     CONSTRAINT FK_CATALOG_PARENT FOREIGN KEY (parentCatalogID) REFERENCES CATALOGLIST(catalogID)
 );
@@ -82,31 +82,32 @@ GO
 CREATE TABLE PRODUCT(
     prodID INT IDENTITY(1,1) PRIMARY KEY,
     catalogID INT NOT NULL,
-    name VARCHAR(150) NOT NULL,
-    description VARCHAR(500) NULL,
-    placeOfProduction VARCHAR(150) NULL,
-    origin VARCHAR(100) NULL,
+    name NVARCHAR(150) NOT NULL,              -- Đã sửa
+    description NVARCHAR(500) NULL,           -- Đã sửa
+    placeOfProduction NVARCHAR(150) NULL,     -- Đã sửa
+    origin NVARCHAR(100) NULL,                -- Đã sửa
     FOREIGN KEY (catalogID) REFERENCES CATALOGLIST(catalogID)
 );
 GO
 
-/* VARIETY */
+/* VARIETY*/
 CREATE TABLE VARIETY(
     prodID INT NOT NULL,
-    color VARCHAR(50) NOT NULL,
+    color NVARCHAR(50) NOT NULL,          -- Đã sửa
     stockAmount INT NOT NULL CHECK (stockAmount >= 0),
-    unitOfMeasure VARCHAR(30) NOT NULL,
+    unitOfMeasure NVARCHAR(30) NOT NULL,  -- Đã sửa
     listedPrice DECIMAL(12,2) NOT NULL CHECK (listedPrice >= 0),
+    imageUrl VARCHAR(500) NULL, -- <--- Mới thêm nha
     PRIMARY KEY (prodID, color, unitOfMeasure),
     FOREIGN KEY (prodID) REFERENCES PRODUCT(prodID)
 );
 GO
 
-/* SUPPLIER */
+/* SUPPLIER*/
 CREATE TABLE SUPPLIER(
     supplierID INT IDENTITY(1,1) PRIMARY KEY,
-    origin VARCHAR(100) NULL,
-    description VARCHAR(500) NULL
+    origin NVARCHAR(100) NULL,       -- Đã sửa
+    description NVARCHAR(500) NULL   -- Đã sửa
 );
 GO
 
@@ -120,15 +121,15 @@ CREATE TABLE PROVIDE(
 );
 GO
 
-/* CARRIER */
+/* CARRIER*/
 CREATE TABLE CARRIER(
     carrierID INT IDENTITY(1,1) PRIMARY KEY,
-    name VARCHAR(150) NOT NULL,
+    name NVARCHAR(150) NOT NULL, -- Đã sửa
     phone VARCHAR(20) NULL CHECK (phone NOT LIKE '%[^0-9+]%')
 );
 GO
 
-/* CART */
+/* CART*/
 CREATE TABLE CART(
     CartID INT IDENTITY(1,1) PRIMARY KEY,
     cartState VARCHAR(20) NOT NULL CHECK (cartState IN ('Active','Ordered','Expired')),
@@ -137,13 +138,13 @@ CREATE TABLE CART(
 );
 GO
 
-/* CARTITEM */
+/* CARTITEM*/
 CREATE TABLE CARTITEM(
     CartID INT NOT NULL,
     quantity INT NOT NULL CHECK (quantity > 0),
     ordinalNumber INT NOT NULL,
-    color VARCHAR(50) NOT NULL,
-    unitOfMeasure VARCHAR(30) NOT NULL,
+    color NVARCHAR(50) NOT NULL,         -- Đã sửa (FK)
+    unitOfMeasure NVARCHAR(30) NOT NULL, -- Đã sửa (FK)
     prodID INT NOT NULL,
     PRIMARY KEY (CartID, ordinalNumber),
     FOREIGN KEY (CartID) REFERENCES CART(CartID),
@@ -151,11 +152,11 @@ CREATE TABLE CARTITEM(
 );
 GO
 
-/* COUPON */
+/* COUPON: Mô tả khuyến mãi */
 CREATE TABLE COUPON(
     CouponID INT IDENTITY(1,1) PRIMARY KEY,
     employeeID INT NOT NULL,
-    description VARCHAR(300) NULL,
+    description NVARCHAR(300) NULL, -- Đã sửa
     discountPercent INT NULL CHECK (discountPercent BETWEEN 0 AND 100),
     discountedPrice DECIMAL(12,2) NULL CHECK (discountedPrice >= 0),
     startDate DATE NOT NULL,
@@ -165,7 +166,7 @@ CREATE TABLE COUPON(
 );
 GO
 
-/* ORDER */
+/* ORDER*/
 CREATE TABLE [ORDER](
     OrderID INT IDENTITY(1,1) PRIMARY KEY,
     customerID INT NOT NULL,
@@ -174,18 +175,18 @@ CREATE TABLE [ORDER](
     orderDate DATE NOT NULL,
     finalPrice DECIMAL(12,2) NOT NULL CHECK (finalPrice >= 0),
     stateOfOrder VARCHAR(20) NULL CHECK (stateOfOrder IN ('New','Processing','Shipped','Delivered','Cancelled')),
-    addrToShip VARCHAR(300) NULL,
+    addrToShip NVARCHAR(300) NULL, -- Đã sửa
     FOREIGN KEY (customerID) REFERENCES CUSTOMER(UserID),
     FOREIGN KEY (employeeID) REFERENCES EMPLOYEE(UserID),
     FOREIGN KEY (couponID) REFERENCES COUPON(CouponID)
 );
 GO
 
-/* ORDERITEM */
+/* ORDERITEM*/
 CREATE TABLE ORDERITEM(
     OrderID INT NOT NULL,
-    color VARCHAR(50) NOT NULL,
-    unitOfMeasure VARCHAR(30) NOT NULL,
+    color NVARCHAR(50) NOT NULL,         -- Đã sửa (FK)
+    unitOfMeasure NVARCHAR(30) NOT NULL, -- Đã sửa (FK)
     prodID INT NOT NULL,
     ordinalNo INT NOT NULL,
     quantity INT NOT NULL CHECK (quantity > 0),
@@ -197,12 +198,12 @@ CREATE TABLE ORDERITEM(
 );
 GO
 
-/* PAYMENT */
+/* PAYMENT: Nhà cung cấp, Phương thức (VD: Ví MoMo) */
 CREATE TABLE PAYMENT(
     TransID INT IDENTITY(1,1) PRIMARY KEY,
     OrderID INT NOT NULL,
-    provider VARCHAR(100) NULL,
-    paymentMethod VARCHAR(50) NULL,
+    provider NVARCHAR(100) NULL,      -- Đã sửa
+    paymentMethod NVARCHAR(50) NULL,  -- Đã sửa
     paidAmount DECIMAL(12,2) NOT NULL CHECK (paidAmount >= 0),
     status VARCHAR(30) NULL CHECK (status IN ('Pending','Completed','Failed','Refunded')),
     FOREIGN KEY (OrderID) REFERENCES [ORDER](OrderID)
@@ -232,16 +233,15 @@ CREATE TABLE MANAGE(
 );
 GO
 
-/* RATING */
+/* RATING*/
 CREATE TABLE RATING(
     ratingID INT IDENTITY(1,1) PRIMARY KEY,
     customerID INT NOT NULL,
     prodID INT NOT NULL,
     starNo INT NOT NULL CHECK (starNo BETWEEN 1 AND 5),
-    comment VARCHAR(500) NULL,
+    comment NVARCHAR(500) NULL, -- Đã sửa
     dateOfRating DATE NOT NULL,
     FOREIGN KEY (customerID) REFERENCES CUSTOMER(UserID),
     FOREIGN KEY (prodID) REFERENCES PRODUCT(prodID)
 );
 GO
-

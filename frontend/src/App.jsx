@@ -11,7 +11,6 @@ import Register from "./pages/auth/Register";
 import Dashboard from "./pages/admin/Dashboard";
 import CustomerManager from "./pages/admin/CustomerManager";
 import EmployeeManager from "./pages/admin/EmployeeManager";
-import RevenueManager from "./pages/admin/RevenueManager";
 
 import ProtectedRoute from "./components/ProtectedRoute";
 
@@ -39,9 +38,7 @@ export default function App() {
         <Route
           path="/admin"
           element={
-            <ProtectedRoute
-              allowedRoles={["employee", "manager", "admin", "Staff"]}
-            >
+            <ProtectedRoute allowedRoles={["!customer"]}>
               <AdminLayout />
             </ProtectedRoute>
           }
@@ -51,8 +48,6 @@ export default function App() {
           {/* /admin/customers */}
           <Route path="employees" element={<EmployeeManager />} />{" "}
           {/* /admin/employees */}
-          <Route path="reports" element={<RevenueManager />} />{" "}
-          {/* /admin/reports */}
         </Route>
       </Routes>
 

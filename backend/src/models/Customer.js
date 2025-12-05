@@ -1,24 +1,57 @@
 import { sql } from "../config/database.js";
 
 class Customer {
-  static async create(userId) {
+  // 1. Lấy tất cả (Gọi SP_GetAllCustomer)
+  static async getAll() {
     const request = new sql.Request();
-    request.input("id", sql.Int, userId);
-
-    return await request.query(`
-      INSERT INTO CUSTOMER (UserID) VALUES (@id)
-    `);
+    // Execute gọi thủ tục, không viết query thường
+    const result = await request.execute("SP_GetAllCustomer");
+    return result.recordset;
   }
 
-  static async findById(userId) {
+  // 2. Tìm kiếm (Gọi SP_SearchUser)
+  static async search(keyword, minP, maxP) {
     const request = new sql.Request();
-    request.input("id", sql.Int, userId);
 
-    const res = await request.query(`
-      SELECT * FROM CUSTOMER WHERE UserID = @id
-    `);
+    // Check null để truyền vào SP đúng logic
+    request.input("Keyword", sql.NVarChar, keyword || null);
+    request.input("MinP", sql.Int, minP === "" ? null : minP);
+    request.input("MaxP", sql.Int, maxP === "" ? null : maxP);
 
-    return res.recordset[0];
+    const result = await request.execute("SP_SearchUser");
+    return result.recordset;
+  }
+
+  // 3. Cập nhật (Gọi SP_UpdateCustomer)
+  static async update(id, { fullName, email, loyaltyPoint }) {
+    const request = new sql.Request();
+    request.input("UserID", sql.Int, id);
+    request.input("FullName", sql.NVarChar, fullName);
+    request.input("Email", sql.VarChar, email);
+    request.input("LoyaltyPoint", sql.Int, loyaltyPoint);
+
+    await request.execute("SP_UpdateCustomer");
+    return true;
+  }
+
+  // 4. Xóa (Gọi SP_DeleteCustomer)
+  static async delete(id) {
+    const request = new sql.Request();
+    request.input("UserID", sql.Int, id);
+
+    await request.execute("SP_DeleteCustomer");
+    return true;
+  }
+
+  static async findById(id) {
+    const request = new sql.Request();
+    request.input("id", sql.Int, id);
+
+    const result = await request.query(
+      "SELECT * FROM Customer WHERE UserID = @id"
+    );
+
+    return result.recordset[0];
   }
 }
 

@@ -24,7 +24,7 @@ const Login = () => {
       const response = await login(form.username, form.password);
       const user = response.user; // Đảm bảo backend trả về object user có trường role
 
-      toast.success(`Chào mừng ${user.fullName || user.username}!`);
+      toast.success(`Chào mừng ${user.firstName || user.username}!`);
 
       // Logic chuyển trang dựa trên DB:
       // Bảng Customer không có cột role, Employee mới có.

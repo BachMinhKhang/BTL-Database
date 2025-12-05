@@ -52,9 +52,6 @@ export default function Header() {
           <Link className="hover:text-blue-500 transition" to="/">
             Home
           </Link>
-          <Link className="hover:text-blue-500 transition" to="/products">
-            Products
-          </Link>
           <Link className="hover:text-blue-500 transition" to="/cart">
             Cart
           </Link>
@@ -67,9 +64,9 @@ export default function Header() {
             <>
               <span
                 className="text-gray-700 font-medium max-w-32 truncate"
-                title={user.username}
+                title={user.firstName}
               >
-                Hi, {user.username}
+                Hi, {user.firstName}
               </span>
 
               <button
