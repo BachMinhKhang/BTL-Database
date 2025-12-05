@@ -4,6 +4,7 @@ import MainLayout from "./layouts/MainLayout";
 import AdminLayout from "./layouts/AdminLayout";
 
 import Home from "./pages/customer/Home";
+import CustomerProfile from "./pages/customer/Profile";
 import Login from "./pages/auth/Login";
 import Register from "./pages/auth/Register";
 
@@ -11,6 +12,7 @@ import Register from "./pages/auth/Register";
 import Dashboard from "./pages/admin/Dashboard";
 import CustomerManager from "./pages/admin/CustomerManager";
 import EmployeeManager from "./pages/admin/EmployeeManager";
+import AdminProfile from "./pages/admin/Profile";
 
 import ProtectedRoute from "./components/ProtectedRoute";
 
@@ -27,6 +29,7 @@ export default function App() {
           <Route index element={<Home />} />
           <Route path="login" element={<Login />} />
           <Route path="register" element={<Register />} />
+          <Route path="profile" element={<CustomerProfile />} />
           {/* <Route path="product/:id" element={<ProductDetail />} /> */}
           {/* <Route path="cart" element={<Cart />} /> */}
         </Route>
@@ -48,6 +51,7 @@ export default function App() {
           {/* /admin/customers */}
           <Route path="employees" element={<EmployeeManager />} />{" "}
           {/* /admin/employees */}
+          <Route path="profile" element={<AdminProfile />} />
         </Route>
       </Routes>
 
