@@ -11,7 +11,6 @@ import Register from "./pages/auth/Register";
 // --- Admin Pages (Manager) ---
 import Dashboard from "./pages/admin/Dashboard";
 import CustomerManager from "./pages/admin/CustomerManager";
-import EmployeeManager from "./pages/admin/EmployeeManager";
 import AdminProfile from "./pages/admin/Profile";
 
 import ProtectedRoute from "./components/ProtectedRoute";
@@ -49,8 +48,6 @@ export default function App() {
           <Route index element={<Dashboard />} /> {/* /admin */}
           <Route path="customers" element={<CustomerManager />} />{" "}
           {/* /admin/customers */}
-          <Route path="employees" element={<EmployeeManager />} />{" "}
-          {/* /admin/employees */}
           <Route path="profile" element={<AdminProfile />} />
         </Route>
       </Routes>
