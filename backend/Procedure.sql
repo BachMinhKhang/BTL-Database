@@ -434,7 +434,7 @@ BEGIN
     INNER JOIN 
         dbo.[USER] U ON C.UserID = U.UserID
     LEFT JOIN 
-        dbo.[ORDER] O ON C.UserID = O.customerID
+        dbo.[ORDER] O ON C.UserID = O.customerID AND O.stateOfOrder != 'Cancelled'
     GROUP BY 
         -- Nhớ Group By đủ các cột đã Select
         U.UserID, U.username, U.email, U.fullName, U.firstName, U.lastName, 
