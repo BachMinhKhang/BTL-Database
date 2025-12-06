@@ -79,9 +79,9 @@ export const updateCustomer = async (req, res) => {
     } = req.body;
 
     // Kiểm tra các trường bắt buộc
-    if (!username || !email || !password) {
+    if (!username || !email) {
       return res.status(400).json({
-        message: "Cần cung cấp username, email và password",
+        message: "Cần cung cấp username, email",
       });
     }
     let fullName = lastName + " " + firstName;

@@ -174,7 +174,7 @@ CREATE OR ALTER PROC dbo.sp_UpdateUser
   @UserID INT,
   @username    VARCHAR(50),
   @email       VARCHAR(100),
-  @password    VARCHAR(100),
+  @password    VARCHAR(100) = NULL,
   @phoneNo     VARCHAR(20)  = NULL,
   @fullName    NVARCHAR(100) = NULL, -- Đã đổi sang NVARCHAR
   @firstName   NVARCHAR(50)  = NULL, -- Đã đổi sang NVARCHAR
@@ -230,7 +230,7 @@ BEGIN
     THROW 53008, 'Email đã tồn tại.', 1;
 
   /* 5) Validate password */
-  IF @password IS NULL OR LEN(@password) < 6
+  IF @password IS NOT NULL AND LEN(@password) < 6
     THROW 53009, 'Password phải có ít nhất 6 ký tự.', 1;
 
   /* 6) Validate phoneNo */
@@ -253,7 +253,11 @@ BEGIN
   UPDATE dbo.[USER]
   SET username = @username,
       email = @email,
-      password = @password,
+      password = CASE 
+                 WHEN @password IS NOT NULL AND LTRIM(RTRIM(@password)) <> '' 
+                   THEN @password 
+                 ELSE password 
+               END,
       phoneNo = @phoneNo,
       fullName = @fullName,
       firstName = @firstName,

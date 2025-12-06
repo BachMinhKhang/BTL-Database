@@ -51,7 +51,7 @@ class Customer {
     userId,
     username,
     email,
-    password,
+    password = null,
     phoneNo = null,
     fullName = null,
     firstName = null,
