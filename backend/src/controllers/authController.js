@@ -24,7 +24,7 @@ export const register = async (req, res) => {
     }
 
     let newUser = null;
-    let fullName = lastName + firstName;
+    let fullName = lastName + " " + firstName;
     // 2. Gọi Model để thực thi Stored Procedure
     if (role === "customer") {
       newUser = await Customer.register({
@@ -138,6 +138,7 @@ export const login = async (req, res) => {
         email: user.email,
         firstName: user.firstName,
         role: roleName,
+        loyaltyPoint: customerRecord?.loyaltyPoint,
       },
     });
   } catch (err) {

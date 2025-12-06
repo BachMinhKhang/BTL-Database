@@ -29,7 +29,7 @@ export const createCustomer = async (req, res) => {
     numAndStreet,
     loyaltyPoint,
   } = req.body;
-  let fullName = lastName + firstName;
+  let fullName = lastName + " " + firstName;
   try {
     let newUser = await Customer.register({
       username,
@@ -84,7 +84,7 @@ export const updateCustomer = async (req, res) => {
         message: "Cần cung cấp username, email và password",
       });
     }
-    let fullName = lastName + firstName;
+    let fullName = lastName + " " + firstName;
     await Customer.update({
       userId: id,
       username,
