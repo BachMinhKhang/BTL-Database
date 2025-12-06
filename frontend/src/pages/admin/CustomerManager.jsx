@@ -240,7 +240,7 @@ export default function CustomerManager() {
               <th className="p-4 border-b">ID</th>
               <th className="p-4 border-b">Khách hàng</th>
               <th className="p-4 border-b">Liên hệ</th>
-              <th className="p-4 border-b text-center">Điểm</th>
+              <th className="p-4 border-b text-center">Điểm thành viên</th>
               <th className="p-4 border-b text-center">Đơn hàng</th>
               <th className="p-4 border-b text-right">Tổng chi</th>
               <th className="p-4 border-b text-center">Hành động</th>

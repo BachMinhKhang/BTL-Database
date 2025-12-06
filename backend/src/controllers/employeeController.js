@@ -22,7 +22,7 @@ export const updateEmployee = async (req, res) => {
         message: "Cần cung cấp username, email và password",
       });
     }
-    let fullName = lastName + firstName;
+    let fullName = lastName + " " + firstName;
     await Employee.update({
       userId: id,
       username,

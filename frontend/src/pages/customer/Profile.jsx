@@ -2,29 +2,30 @@ import { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
 import { getCurrentUser, logout } from "../../services/authService";
-import {
-  getCustomers,
-  updateCustomer,
-  deleteCustomer,
-} from "../../services/customerService";
+// 1. Import service mới
+import { getUserById } from "../../services/userService";
+// 2. Import service cũ (để dùng hàm update/delete)
+import { updateCustomer, deleteCustomer } from "../../services/customerService";
 
+// Hàm tiện ích lấy ID từ object user (vì DB có thể trả về UserID, userId, hoặc id)
 const pickId = (u) => u?.UserID ?? u?.userId ?? u?.id ?? u?.userid;
 
 export default function Profile() {
   const navigate = useNavigate();
+
+  // Lấy user hiện tại từ localStorage
   const currentUser = useMemo(() => getCurrentUser(), []);
   const userId = useMemo(() => pickId(currentUser), [currentUser]);
 
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
 
-  // form
+  // Form state
   const [form, setForm] = useState({
     username: "",
     email: "",
-    password: "", // để trống = không đổi (nếu backend cho phép)
+    password: "",
     phoneNo: "",
-
     firstName: "",
     lastName: "",
     district: "",
@@ -33,72 +34,83 @@ export default function Profile() {
     loyaltyPoint: 0,
   });
 
-  // load dữ liệu hiện tại (ưu tiên lấy từ API để đúng nhất)
+  // --- LOGIC MỚI: Tải dữ liệu bằng ID ---
   useEffect(() => {
     if (!currentUser || !userId) {
       navigate("/login");
       return;
     }
 
-    const boot = async () => {
+    const fetchData = async () => {
       setLoading(true);
       try {
-        // API customers là GET list + search -> mình search theo username rồi tìm đúng ID
-        const list = await getCustomers({ keyword: currentUser.username });
-        const found =
-          (Array.isArray(list) ? list : []).find(
-            (c) => (c.UserID ?? c.userId ?? c.id) === userId
-          ) || (Array.isArray(list) ? list : [])[0];
+        // Gọi API lấy chi tiết User theo ID
+        const userData = await getUserById(userId);
 
-        const src = found;
-
-        setForm((prev) => ({
-          ...prev,
-          username: src.username ?? "",
-          email: src.email ?? "",
-          password: "",
-          phoneNo: src.phoneNo ?? "",
-          firstName: src.firstName ?? "",
-          lastName: src.lastName ?? "",
-          district: src.district ?? "",
-          province: src.province ?? "",
-          numAndStreet: src.numAndStreet ?? "",
-          loyaltyPoint: src.loyaltyPoint ?? 0,
-        }));
-      } catch (e) {
+        if (userData) {
+          // Fill dữ liệu vào form
+          setForm((prev) => ({
+            ...prev,
+            username: userData.username || "",
+            email: userData.email || "",
+            password: "", // Luôn để trống mật khẩu
+            phoneNo: userData.phoneNo || "",
+            firstName: userData.firstName || "",
+            lastName: userData.lastName || "",
+            district: userData.district || "",
+            province: userData.province || "",
+            numAndStreet: userData.numAndStreet || "",
+            // Các trường riêng của Customer (nếu Backend join bảng trả về)
+            loyaltyPoint: currentUser.loyaltyPoint || 0,
+          }));
+        }
+      } catch (error) {
+        console.error("Profile Load Error:", error);
+        // Có thể user bị xóa ở DB nhưng localStorage vẫn còn -> Đá về login
+        if (error.response && error.response.status === 404) {
+          toast.error("Không tìm thấy thông tin tài khoản.");
+        }
       } finally {
         setLoading(false);
       }
     };
 
-    boot();
+    fetchData();
   }, [currentUser, userId, navigate]);
 
+  // Handle Input Change
   const onChange = (key) => (e) =>
     setForm((p) => ({ ...p, [key]: e.target.value }));
 
+  // Handle Save (Cập nhật)
   const handleSave = async (e) => {
     e.preventDefault();
     if (!userId) return;
 
-    // payload: nếu password rỗng thì không gửi (đỡ “reset” password)
+    // Payload: Chỉ gửi password nếu người dùng nhập mới
     const payload = { ...form };
-    if (!payload.password || payload.password.trim() === "")
+    if (!payload.password || payload.password.trim() === "") {
       delete payload.password;
+    }
 
     setSaving(true);
     try {
+      // Gọi API update (vẫn dùng hàm cũ updateCustomer hoặc bạn có thể viết thêm updateUser trong userService)
       await updateCustomer(userId, payload);
-      toast.success("Cập nhật thông tin thành công!");
 
-      // update localStorage để Header đổi tên
-      const newUser = {
+      toast.success("Cập nhật thành công!");
+
+      // Cập nhật lại localStorage để Header hiển thị đúng tên mới
+      const newUserLocal = {
         ...currentUser,
         ...payload,
         UserID: userId,
       };
-      localStorage.setItem("user", JSON.stringify(newUser));
-      window.dispatchEvent(new Event("userUpdated"));
+      // Xóa pass khỏi local storage cho an toàn
+      delete newUserLocal.password;
+
+      localStorage.setItem("user", JSON.stringify(newUserLocal));
+      window.dispatchEvent(new Event("userUpdated")); // Bắn sự kiện reload header
     } catch (err) {
       toast.error(err.response?.data?.message || "Cập nhật thất bại!");
     } finally {
@@ -106,17 +118,19 @@ export default function Profile() {
     }
   };
 
+  // Handle Delete (Xóa tài khoản)
   const handleDelete = async () => {
     if (!userId) return;
     const ok = window.confirm(
-      "Bạn chắc chắn muốn xóa tài khoản?\nNếu tài khoản có ràng buộc (đơn hàng/coupon/...) thì hệ thống sẽ không cho xóa."
+      "Bạn có chắc muốn xóa tài khoản?\nHành động này không thể hoàn tác và sẽ xóa toàn bộ điểm tích lũy."
     );
     if (!ok) return;
 
     try {
       await deleteCustomer(userId);
-      toast.success("Đã xóa tài khoản!");
-      // logout local
+      toast.success("Đã xóa tài khoản.");
+
+      // Logout & Redirect
       await logout().catch(() => {});
       localStorage.removeItem("token");
       localStorage.removeItem("user");
@@ -125,51 +139,61 @@ export default function Profile() {
     } catch (err) {
       toast.error(
         err.response?.data?.message ||
-          "Không thể xóa tài khoản (có thể do ràng buộc dữ liệu)."
+          "Không thể xóa (có thể do ràng buộc đơn hàng)."
       );
     }
   };
 
   if (loading) {
-    return <div className="min-h-screen bg-gray-50 p-6 pt-10">Đang tải...</div>;
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gray-50">
+        <div className="text-gray-500 font-medium">Đang tải thông tin...</div>
+      </div>
+    );
   }
 
   return (
     <div className="min-h-screen bg-gray-50 p-6 pt-10">
       <div className="max-w-4xl mx-auto">
+        {/* Info Card */}
         <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-6 mb-6">
-          <div className="flex items-start justify-between gap-4">
+          <div className="flex justify-between items-center">
             <div>
-              <h1 className="text-2xl font-bold">Hồ sơ khách hàng</h1>
+              <h1 className="text-2xl font-bold text-gray-800">
+                Hồ sơ của tôi
+              </h1>
               <p className="text-gray-500 mt-1">
-                UserID:{" "}
-                <span className="font-medium text-gray-700">{userId}</span> ·
-                Loyalty point:{" "}
-                <span className="font-medium text-gray-700">
-                  {form.loyaltyPoint}
+                ID:{" "}
+                <span className="font-mono font-bold text-gray-700">
+                  #{userId}
                 </span>
+                {form.loyaltyPoint > 0 && (
+                  <span className="ml-4 px-3 py-1 bg-yellow-100 text-yellow-800 rounded-full text-sm font-bold">
+                    {form.loyaltyPoint} điểm
+                  </span>
+                )}
               </p>
             </div>
-
             <button
               onClick={handleDelete}
-              className="px-4 py-2 rounded-xl bg-red-500 text-white hover:bg-red-600 transition"
+              className="px-4 py-2 bg-red-50 text-red-600 rounded-xl hover:bg-red-100 transition text-sm font-medium"
             >
               Xóa tài khoản
             </button>
           </div>
         </div>
 
+        {/* Form */}
         <form
           onSubmit={handleSave}
           className="bg-white rounded-2xl border border-gray-100 shadow-sm p-6"
         >
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
             <Field
               label="Username"
               value={form.username}
               onChange={onChange("username")}
-              required
+              disabled={true} // Không cho sửa username
             />
             <Field
               label="Email"
@@ -180,11 +204,11 @@ export default function Profile() {
             />
 
             <Field
-              label="Mật khẩu (bỏ trống nếu không đổi)"
+              label="Mật khẩu mới"
               type="password"
               value={form.password}
               onChange={onChange("password")}
-              placeholder="••••••••"
+              placeholder="Để trống nếu không đổi"
             />
             <Field
               label="Số điện thoại"
@@ -194,47 +218,51 @@ export default function Profile() {
 
             <div className="grid grid-cols-2 gap-4">
               <Field
-                label="First name"
-                value={form.firstName}
-                onChange={onChange("firstName")}
-              />
-              <Field
-                label="Last name"
+                label="Họ & Tên đệm"
                 value={form.lastName}
                 onChange={onChange("lastName")}
               />
+              <Field
+                label="Tên"
+                value={form.firstName}
+                onChange={onChange("firstName")}
+              />
             </div>
 
-            <Field
-              label="Tỉnh/TP"
-              value={form.province}
-              onChange={onChange("province")}
-            />
-            <Field
-              label="Quận/Huyện"
-              value={form.district}
-              onChange={onChange("district")}
-            />
+            <div className="grid grid-cols-2 gap-4">
+              <Field
+                label="Tỉnh/Thành"
+                value={form.province}
+                onChange={onChange("province")}
+              />
+              <Field
+                label="Quận/Huyện"
+                value={form.district}
+                onChange={onChange("district")}
+              />
+            </div>
 
-            <Field
-              label="Số nhà + Đường"
-              value={form.numAndStreet}
-              onChange={onChange("numAndStreet")}
-            />
+            <div className="md:col-span-2">
+              <Field
+                label="Số nhà, Tên đường"
+                value={form.numAndStreet}
+                onChange={onChange("numAndStreet")}
+              />
+            </div>
           </div>
 
-          <div className="flex justify-end gap-3 mt-6">
+          <div className="flex justify-end gap-3 mt-8 pt-4 border-t">
             <button
               type="button"
               onClick={() => navigate("/")}
-              className="px-4 py-2 rounded-xl border hover:bg-gray-50 transition"
+              className="px-5 py-2 text-gray-600 hover:bg-gray-100 rounded-xl transition"
             >
-              Về trang chủ
+              Quay lại
             </button>
             <button
               type="submit"
               disabled={saving}
-              className="px-5 py-2 rounded-xl bg-blue-600 text-white hover:bg-blue-700 disabled:opacity-60 transition"
+              className="px-6 py-2 bg-blue-600 text-white font-bold rounded-xl hover:bg-blue-700 disabled:opacity-50 transition shadow-lg shadow-blue-200"
             >
               {saving ? "Đang lưu..." : "Lưu thay đổi"}
             </button>
@@ -245,6 +273,7 @@ export default function Profile() {
   );
 }
 
+// Component con để render input cho gọn
 function Field({
   label,
   value,
@@ -252,17 +281,23 @@ function Field({
   type = "text",
   required,
   placeholder,
+  disabled,
 }) {
   return (
     <label className="block">
-      <div className="text-sm font-medium text-gray-700 mb-1">{label}</div>
+      <div className="text-sm font-semibold text-gray-700 mb-1.5 ml-1">
+        {label}
+      </div>
       <input
-        className="w-full border rounded-xl px-3 py-2 outline-none focus:ring-2 focus:ring-blue-200"
+        className={`w-full border rounded-xl px-4 py-2.5 outline-none focus:ring-4 focus:ring-blue-50 focus:border-blue-500 transition-all ${
+          disabled ? "bg-gray-100 text-gray-500" : "bg-white"
+        }`}
         value={value}
         onChange={onChange}
         type={type}
         required={required}
         placeholder={placeholder}
+        disabled={disabled}
       />
     </label>
   );
