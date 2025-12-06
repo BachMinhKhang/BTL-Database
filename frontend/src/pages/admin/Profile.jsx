@@ -17,7 +17,6 @@ export default function Profile() {
     email: currentUser?.email ?? "",
     password: "",
     phoneNo: currentUser?.phoneNo ?? "",
-    fullName: currentUser?.fullName ?? "",
     firstName: currentUser?.firstName ?? "",
     lastName: currentUser?.lastName ?? "",
     district: currentUser?.district ?? "",
@@ -31,12 +30,14 @@ export default function Profile() {
     return null;
   }
 
-  const onChange = (key) => (e) => setForm((p) => ({ ...p, [key]: e.target.value }));
+  const onChange = (key) => (e) =>
+    setForm((p) => ({ ...p, [key]: e.target.value }));
 
   const handleSave = async (e) => {
     e.preventDefault();
     const payload = { ...form };
-    if (!payload.password || payload.password.trim() === "") delete payload.password;
+    if (!payload.password || payload.password.trim() === "")
+      delete payload.password;
 
     setSaving(true);
     try {
@@ -47,7 +48,7 @@ export default function Profile() {
       localStorage.setItem("user", JSON.stringify(newUser));
       window.dispatchEvent(new Event("userUpdated"));
     } catch (err) {
-      toast.error(err?.message || "Cập nhật thất bại!");
+      toast.error(err.response?.data?.message || "Cập nhật thất bại!");
     } finally {
       setSaving(false);
     }
@@ -68,7 +69,10 @@ export default function Profile() {
       window.dispatchEvent(new Event("userUpdated"));
       navigate("/login");
     } catch (err) {
-      toast.error(err?.message || "Không thể xóa (có thể do ràng buộc dữ liệu).");
+      toast.error(
+        error.response?.data?.message ||
+          "Không thể xóa (có thể do ràng buộc dữ liệu)."
+      );
     }
   };
 
@@ -80,7 +84,8 @@ export default function Profile() {
             <div>
               <h1 className="text-2xl font-bold">Hồ sơ nhân viên</h1>
               <p className="text-gray-500 mt-1">
-                UserID: <span className="font-medium text-gray-700">{userId}</span>
+                UserID:{" "}
+                <span className="font-medium text-gray-700">{userId}</span>
               </p>
             </div>
             <button
@@ -92,10 +97,24 @@ export default function Profile() {
           </div>
         </div>
 
-        <form onSubmit={handleSave} className="bg-white rounded-2xl border border-gray-100 shadow-sm p-6">
+        <form
+          onSubmit={handleSave}
+          className="bg-white rounded-2xl border border-gray-100 shadow-sm p-6"
+        >
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <Field label="Username" value={form.username} onChange={onChange("username")} required />
-            <Field label="Email" type="email" value={form.email} onChange={onChange("email")} required />
+            <Field
+              label="Username"
+              value={form.username}
+              onChange={onChange("username")}
+              required
+            />
+            <Field
+              label="Email"
+              type="email"
+              value={form.email}
+              onChange={onChange("email")}
+              required
+            />
 
             <Field
               label="Mật khẩu (bỏ trống nếu không đổi)"
@@ -105,21 +124,48 @@ export default function Profile() {
               placeholder="••••••••"
             />
 
-            <Field label="Số điện thoại" value={form.phoneNo} onChange={onChange("phoneNo")} />
+            <Field
+              label="Số điện thoại"
+              value={form.phoneNo}
+              onChange={onChange("phoneNo")}
+            />
 
-            <Field label="Họ và tên" value={form.fullName} onChange={onChange("fullName")} />
             <div className="grid grid-cols-2 gap-4">
-              <Field label="First name" value={form.firstName} onChange={onChange("firstName")} />
-              <Field label="Last name" value={form.lastName} onChange={onChange("lastName")} />
+              <Field
+                label="Tên"
+                value={form.firstName}
+                onChange={onChange("firstName")}
+              />
+              <Field
+                label="Họ và tên đệm"
+                value={form.lastName}
+                onChange={onChange("lastName")}
+              />
             </div>
 
-            <Field label="Role" value={form.role} onChange={onChange("role")} />
+            <Field
+              label="Chức vụ"
+              value={form.role}
+              onChange={onChange("role")}
+            />
 
-            <Field label="Tỉnh/TP" value={form.province} onChange={onChange("province")} />
-            <Field label="Quận/Huyện" value={form.district} onChange={onChange("district")} />
+            <Field
+              label="Tỉnh/TP"
+              value={form.province}
+              onChange={onChange("province")}
+            />
+            <Field
+              label="Quận/Huyện"
+              value={form.district}
+              onChange={onChange("district")}
+            />
 
             <div className="md:col-span-2">
-              <Field label="Số nhà + Đường" value={form.numAndStreet} onChange={onChange("numAndStreet")} />
+              <Field
+                label="Số nhà + Đường"
+                value={form.numAndStreet}
+                onChange={onChange("numAndStreet")}
+              />
             </div>
           </div>
 
@@ -145,7 +191,14 @@ export default function Profile() {
   );
 }
 
-function Field({ label, value, onChange, type = "text", required, placeholder }) {
+function Field({
+  label,
+  value,
+  onChange,
+  type = "text",
+  required,
+  placeholder,
+}) {
   return (
     <label className="block">
       <div className="text-sm font-medium text-gray-700 mb-1">{label}</div>

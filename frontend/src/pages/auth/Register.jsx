@@ -8,11 +8,12 @@ export default function Register() {
   const navigate = useNavigate();
   const [form, setForm] = useState({
     username: "",
-    fullName: "",
+    firstName: "",
+    lastName: "",
     email: "",
     password: "",
     repassword: "",
-    phone: "",
+    phoneNo: "",
     role: "customer", // Mặc định
     employeeRole: "ProductMgr", // Mặc định nếu chọn là nhân viên
   });
@@ -55,7 +56,7 @@ export default function Register() {
       hasError = true;
     }
     const phoneRegex = /^0\d{9}$/;
-    if (!phoneRegex.test(form.phone)) {
+    if (!phoneRegex.test(form.phoneNo)) {
       newErrors.phone = "*SĐT phải có 10 số và bắt đầu bằng số 0";
       hasError = true;
     }
@@ -70,8 +71,9 @@ export default function Register() {
           username: form.username,
           email: form.email,
           password: form.password,
-          fullName: form.fullName,
-          phone: form.phone,
+          firstName: form.firstName,
+          lastName: form.lastName,
+          phoneNo: form.phoneNo,
           role: form.role,
         };
 
@@ -87,7 +89,7 @@ export default function Register() {
       } catch (error) {
         console.error(error);
         const errorMessage = error.message || "Đăng ký thất bại!";
-        
+
         if (errorMessage.toLowerCase().includes("email")) {
           setErrors({ ...newErrors, email: "*Email đã được sử dụng!" });
         } else if (errorMessage.toLowerCase().includes("username")) {
@@ -107,7 +109,7 @@ export default function Register() {
         <h2 className="text-3xl font-bold text-center text-gray-800 mb-6">
           Tạo tài khoản mới
         </h2>
-        
+
         <form onSubmit={handleSubmit} className="space-y-4">
           {/* Username */}
           <div>
@@ -117,23 +119,44 @@ export default function Register() {
               placeholder="Username (viết liền không dấu)"
               value={form.username}
               onChange={handleChange}
-              className={`w-full px-4 py-3 border rounded-lg focus:outline-none focus:ring-2 ${errors.username ? 'border-red-500 focus:ring-red-500' : 'border-gray-300 focus:ring-blue-500'}`}
+              className={`w-full px-4 py-3 border rounded-lg focus:outline-none focus:ring-2 ${
+                errors.username
+                  ? "border-red-500 focus:ring-red-500"
+                  : "border-gray-300 focus:ring-blue-500"
+              }`}
               required
             />
-            {errors.username && <p className="text-red-500 text-xs mt-1">{errors.username}</p>}
+            {errors.username && (
+              <p className="text-red-500 text-xs mt-1">{errors.username}</p>
+            )}
           </div>
 
-          {/* Full Name */}
-          <div>
-            <input
-              type="text"
-              name="fullName"
-              placeholder="Họ và tên đầy đủ"
-              value={form.fullName}
-              onChange={handleChange}
-              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-              required
-            />
+          <div className="flex gap-3">
+            {/*Last Name */}
+            <div className="w-72">
+              <input
+                type="text"
+                name="lastName"
+                placeholder="Họ và tên đệm"
+                value={form.lastName}
+                onChange={handleChange}
+                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                required
+              />
+            </div>
+
+            {/* First Name */}
+            <div>
+              <input
+                type="text"
+                name="firstName"
+                placeholder="Tên"
+                value={form.firstName}
+                onChange={handleChange}
+                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                required
+              />
+            </div>
           </div>
 
           {/* Email */}
@@ -144,24 +167,36 @@ export default function Register() {
               placeholder="Địa chỉ Email"
               value={form.email}
               onChange={handleChange}
-              className={`w-full px-4 py-3 border rounded-lg focus:outline-none focus:ring-2 ${errors.email ? 'border-red-500 focus:ring-red-500' : 'border-gray-300 focus:ring-blue-500'}`}
+              className={`w-full px-4 py-3 border rounded-lg focus:outline-none focus:ring-2 ${
+                errors.email
+                  ? "border-red-500 focus:ring-red-500"
+                  : "border-gray-300 focus:ring-blue-500"
+              }`}
               required
             />
-            {errors.email && <p className="text-red-500 text-xs mt-1">{errors.email}</p>}
+            {errors.email && (
+              <p className="text-red-500 text-xs mt-1">{errors.email}</p>
+            )}
           </div>
 
           {/* Phone */}
           <div>
             <input
               type="tel"
-              name="phone"
+              name="phoneNo"
               placeholder="Số điện thoại (10 số)"
-              value={form.phone}
+              value={form.phoneNo}
               onChange={handleChange}
-              className={`w-full px-4 py-3 border rounded-lg focus:outline-none focus:ring-2 ${errors.phone ? 'border-red-500 focus:ring-red-500' : 'border-gray-300 focus:ring-blue-500'}`}
+              className={`w-full px-4 py-3 border rounded-lg focus:outline-none focus:ring-2 ${
+                errors.phone
+                  ? "border-red-500 focus:ring-red-500"
+                  : "border-gray-300 focus:ring-blue-500"
+              }`}
               required
             />
-            {errors.phone && <p className="text-red-500 text-xs mt-1">{errors.phone}</p>}
+            {errors.phone && (
+              <p className="text-red-500 text-xs mt-1">{errors.phone}</p>
+            )}
           </div>
 
           {/* Password */}
@@ -172,7 +207,11 @@ export default function Register() {
               placeholder="Mật khẩu (tối thiểu 6 ký tự)"
               value={form.password}
               onChange={handleChange}
-              className={`w-full px-4 py-3 border rounded-lg focus:outline-none focus:ring-2 pr-10 ${errors.password ? 'border-red-500 focus:ring-red-500' : 'border-gray-300 focus:ring-blue-500'}`}
+              className={`w-full px-4 py-3 border rounded-lg focus:outline-none focus:ring-2 pr-10 ${
+                errors.password
+                  ? "border-red-500 focus:ring-red-500"
+                  : "border-gray-300 focus:ring-blue-500"
+              }`}
               required
             />
             <span
@@ -181,7 +220,9 @@ export default function Register() {
             >
               {showPassword ? <HiEyeOff size={20} /> : <HiEye size={20} />}
             </span>
-            {errors.password && <p className="text-red-500 text-xs mt-1">{errors.password}</p>}
+            {errors.password && (
+              <p className="text-red-500 text-xs mt-1">{errors.password}</p>
+            )}
           </div>
 
           {/* Repassword */}
@@ -192,7 +233,11 @@ export default function Register() {
               placeholder="Nhập lại mật khẩu"
               value={form.repassword}
               onChange={handleChange}
-              className={`w-full px-4 py-3 border rounded-lg focus:outline-none focus:ring-2 pr-10 ${errors.repassword ? 'border-red-500 focus:ring-red-500' : 'border-gray-300 focus:ring-blue-500'}`}
+              className={`w-full px-4 py-3 border rounded-lg focus:outline-none focus:ring-2 pr-10 ${
+                errors.repassword
+                  ? "border-red-500 focus:ring-red-500"
+                  : "border-gray-300 focus:ring-blue-500"
+              }`}
               required
             />
             <span
@@ -201,7 +246,9 @@ export default function Register() {
             >
               {showRepassword ? <HiEyeOff size={20} /> : <HiEye size={20} />}
             </span>
-            {errors.repassword && <p className="text-red-500 text-xs mt-1">{errors.repassword}</p>}
+            {errors.repassword && (
+              <p className="text-red-500 text-xs mt-1">{errors.repassword}</p>
+            )}
           </div>
 
           {/* ROLE SELECTION */}
@@ -247,9 +294,13 @@ export default function Register() {
                   onChange={handleChange}
                   className="w-full p-2 border border-gray-300 rounded text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
                 >
-                  <option value="ProductMgr">Quản lý Sản phẩm (ProductMgr)</option>
+                  <option value="ProductMgr">
+                    Quản lý Sản phẩm (ProductMgr)
+                  </option>
                   <option value="OrderMgr">Quản lý Đơn hàng (OrderMgr)</option>
-                  <option value="CouponMgr">Quản lý Mã giảm giá (CouponMgr)</option>
+                  <option value="CouponMgr">
+                    Quản lý Mã giảm giá (CouponMgr)
+                  </option>
                 </select>
               </div>
             )}

@@ -16,6 +16,52 @@ export const getAllCustomers = async (req, res) => {
   }
 };
 
+export const createCustomer = async (req, res) => {
+  const {
+    username,
+    email,
+    password,
+    firstName,
+    lastName,
+    phoneNo,
+    district,
+    province,
+    numAndStreet,
+    loyaltyPoint,
+  } = req.body;
+  let fullName = lastName + firstName;
+  try {
+    let newUser = await Customer.register({
+      username,
+      email,
+      password,
+      firstName,
+      lastName,
+      fullName,
+      phoneNo,
+      district,
+      province,
+      numAndStreet,
+    });
+
+    res.status(201).json({
+      message: "Tạo Customer thành công!",
+      data: newUser,
+    });
+  } catch (err) {
+    console.error("Create Customer Error:", err);
+
+    // Xử lý lỗi từ SQL Server (THROW)
+    // Ví dụ: err.number 53008 (Email trùng), 53004 (Username trùng), 53011 (SĐT sai)
+    if (err.number) {
+      // Trả về đúng message lỗi mà SQL Server đã THROW
+      return res.status(400).json({ message: err.message });
+    }
+
+    res.status(500).json({ message: "Lỗi server: " + err.message });
+  }
+};
+
 // PUT /api/customers/:id
 export const updateCustomer = async (req, res) => {
   try {
@@ -25,7 +71,6 @@ export const updateCustomer = async (req, res) => {
       email,
       password,
       phoneNo,
-      fullName,
       firstName,
       lastName,
       district,
@@ -39,7 +84,7 @@ export const updateCustomer = async (req, res) => {
         message: "Cần cung cấp username, email và password",
       });
     }
-
+    let fullName = lastName + firstName;
     await Customer.update({
       userId: id,
       username,
@@ -70,7 +115,9 @@ export const deleteCustomer = async (req, res) => {
   } catch (error) {
     // Nếu lỗi FK (ví dụ khách đã mua hàng) thì DB sẽ throw error
     res.status(400).json({
-      message: "Không thể xóa khách hàng này (có thể do ràng buộc dữ liệu): " + error.message,
+      message:
+        "Không thể xóa khách hàng này (có thể do ràng buộc dữ liệu): " +
+        error.message,
     });
   }
 };
