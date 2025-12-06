@@ -3,6 +3,7 @@ import MainLayout from "./layouts/MainLayout";
 import AdminLayout from "./layouts/AdminLayout";
 
 import Home from "./pages/customer/Home";
+import CustomerProfile from "./pages/customer/Profile";
 import Login from "./pages/auth/Login";
 import Register from "./pages/auth/Register";
 import Cart from "./pages/customer/Cart"; 
@@ -10,6 +11,7 @@ import Cart from "./pages/customer/Cart";
 import Dashboard from "./pages/admin/DashBoard"; 
 import CustomerManager from "./pages/admin/CustomerManager";
 import EmployeeManager from "./pages/admin/EmployeeManager";
+import AdminProfile from "./pages/admin/Profile";
 
 import ProtectedRoute from "./components/ProtectedRoute";
 import { ToastContainer } from "react-toastify";
