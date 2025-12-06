@@ -2,132 +2,24 @@ USE [BTL2];
 GO
 
 -- // 2.1 
-IF OBJECT_ID('sp_InsertCustomer') IS NOT NULL DROP PROCEDURE sp_InsertCustomer;
-GO
-
-CREATE PROCEDURE sp_InsertCustomer
+CREATE OR ALTER PROCEDURE sp_InsertEmployee
     @username VARCHAR(50),
     @email VARCHAR(100),
     @password VARCHAR(100),
+    @employeeRole NVARCHAR(50),   -- Đã đổi sang NVARCHAR
     @phoneNo VARCHAR(20) = NULL,
-    @fullName VARCHAR(100) = NULL,
-    @firstName VARCHAR(50) = NULL,
-    @lastName VARCHAR(50) = NULL,
-    @district VARCHAR(50) = NULL,
-    @province VARCHAR(50) = NULL,
-    @numAndStreet VARCHAR(100) = NULL,
-    @loyaltyPoint INT = 0
+    @fullName NVARCHAR(100) = NULL, -- Đã đổi sang NVARCHAR
+    @firstName NVARCHAR(50) = NULL, -- Đã đổi sang NVARCHAR
+    @lastName NVARCHAR(50) = NULL,  -- Đã đổi sang NVARCHAR
+    @district NVARCHAR(50) = NULL,  -- Đã đổi sang NVARCHAR
+    @province NVARCHAR(50) = NULL,  -- Đã đổi sang NVARCHAR
+    @numAndStreet NVARCHAR(100) = NULL -- Đã đổi sang NVARCHAR
 AS
 BEGIN
     SET NOCOUNT ON;
     DECLARE @NewUserID INT;
     
-    -- *** 1. LOGIC XỬ LÝ VÀ KIỂM TRA ĐẦU VÀO ***
-
-    -- A. TÍNH TOÁN VÀ KIỂM TRA FULLNAME
-    IF @fullName IS NULL OR LTRIM(RTRIM(@fullName)) = ''
-    BEGIN
-        SET @fullName = LTRIM(RTRIM(
-                          ISNULL(@firstName, '') + 
-                          CASE WHEN ISNULL(@firstName, '') != '' AND ISNULL(@lastName, '') != '' THEN ' ' ELSE '' END + 
-                          ISNULL(@lastName, '')
-                      ));
-    END
-
-    IF @fullName IS NULL OR LTRIM(RTRIM(@fullName)) = '' 
-    BEGIN
-        RAISERROR(N'Lỗi: Cần cung cấp ít nhất @firstName và @lastName để tạo tên đầy đủ.', 16, 1);
-        RETURN;
-    END
-  
-    -- B. XỬ LÝ VÀ KIỂM TRA PHONENO
-    IF @phoneNo IS NULL OR LTRIM(RTRIM(@phoneNo)) = ''
-    BEGIN
-        RAISERROR(N'Lỗi: Cần cung cấp số điện thoại để tiếp tục.', 16, 1);
-        RETURN;
-    END
-
-    SET @phoneNo = LTRIM(RTRIM(@phoneNo));
-    IF LEFT(@phoneNo, 1) = '+' AND LEN(@phoneNo) >= 3
-    BEGIN
-        SET @phoneNo = '0' + SUBSTRING(@phoneNo, 4, LEN(@phoneNo));
-    END
-    
-    DECLARE @PhoneLength INT = LEN(@phoneNo);
-    
-    IF @PhoneLength < 9 OR @PhoneLength > 11
-    BEGIN
-        RAISERROR(N'Lỗi: Số điện thoại phải có độ dài từ 9 đến 11 ký tự.', 16, 1);
-        RETURN;
-    END
-    IF @email IS NULL OR @email = ''
-        THROW 53005, 'Email không được rỗng.', 1;
-
-    IF LEN(@email) > 100
-        THROW 53006, 'Email tối đa 100 ký tự.', 1;
-    -- C. KIỂM TRA EMAIL và PASSWORD (Đã di chuyển vào đây)
-    IF @email NOT LIKE '%_@_%._%' BEGIN
-        RAISERROR(N'Email phải có dạng <text>@<text>.<text>', 16, 1);
-        RETURN;
-    END
-    IF LEN(@password) < 6 BEGIN
-        RAISERROR(N'Lỗi: Mật khẩu phải có ít nhất 6 ký tự.', 16, 1);
-        RETURN;
-    END
-    BEGIN TRANSACTION; 
-    BEGIN TRY
-        -- 3. INSERT vào bảng [USER]
-        INSERT INTO [USER] (username, email, password, phoneNo, fullName, firstName, lastName, district, province, numAndStreet)
-        VALUES (@username, @email, @password, @phoneNo, @fullName, @firstName, @lastName, @district, @province, @numAndStreet);
-
-        SET @NewUserID = SCOPE_IDENTITY();
-
-        -- 4. INSERT vào bảng CUSTOMER
-        INSERT INTO CUSTOMER (UserID, loyaltyPoint) 
-        VALUES (@NewUserID, @loyaltyPoint);
-
-        COMMIT TRANSACTION;
-    
-        -- Trả về thông tin người dùng vừa được tạo (để in ra màn hình)
-        SELECT U.*, C.loyaltyPoint, 'Customer' AS RoleType
-        FROM [USER] U JOIN CUSTOMER C ON U.UserID = C.UserID
-        WHERE U.UserID = @NewUserID;
-        
-    END TRY
-    BEGIN CATCH
-        IF @@TRANCOUNT > 0
-            ROLLBACK TRANSACTION;
-        THROW;
-        RETURN;
-    END CATCH
-    
-END -- KẾT THÚC PROCEDURE
-GO
-
-
-IF OBJECT_ID('sp_InsertEmployee') IS NOT NULL DROP PROCEDURE sp_InsertEmployee;
-GO
-
-CREATE PROCEDURE sp_InsertEmployee
-    @username VARCHAR(50),
-    @email VARCHAR(100),
-    @password VARCHAR(100),
-    @employeeRole VARCHAR(50), -- BẮT BUỘC: Cung cấp chức danh
-    @phoneNo VARCHAR(20) = NULL,
-    @fullName VARCHAR(100) = NULL,
-    @firstName VARCHAR(50) = NULL,
-    @lastName VARCHAR(50) = NULL,
-    @district VARCHAR(50) = NULL,
-    @province VARCHAR(50) = NULL,
-    @numAndStreet VARCHAR(100) = NULL
-AS
-BEGIN
-    SET NOCOUNT ON;
-    DECLARE @NewUserID INT;
-    
-    -- *** 1. LOGIC XỬ LÝ VÀ KIỂM TRA ĐẦU VÀO ***
-
-    -- A. TÍNH TOÁN VÀ KIỂM TRA FULLNAME
+    -- *** 1. LOGIC TÊN ***
     IF @fullName IS NULL OR LTRIM(RTRIM(@fullName)) = ''
     BEGIN
         SET @fullName = LTRIM(RTRIM(
@@ -141,80 +33,139 @@ BEGIN
     END
 
     IF @fullName IS NULL OR LTRIM(RTRIM(@fullName)) = '' 
-    BEGIN
-        RAISERROR(N'Lỗi: Cần cung cấp ít nhất @firstName và @lastName để tạo tên đầy đủ.', 16, 1);
-        RETURN;
-    END
+        THROW 53012, 'Lỗi: Cần cung cấp ít nhất tên để tạo FullName.', 1;
 
-    -- B. XỬ LÝ VÀ KIỂM TRA PHONENO
-    
-    -- Xử lý nếu phoneNo không phải là NULL
-    IF @phoneNo IS NOT NULL AND LTRIM(RTRIM(@phoneNo)) != ''
+    -- *** 2. LOGIC PHONENO (Chuẩn 10 số) ***
+    IF @phoneNo IS NOT NULL
     BEGIN
         SET @phoneNo = LTRIM(RTRIM(@phoneNo));
+        IF @phoneNo = '' THROW 53010, 'Số điện thoại không được là chuỗi rỗng.', 1;
+        IF @phoneNo NOT LIKE '0[0-9][0-9][0-9][0-9][0-9][0-9][0-9][0-9][0-9]'
+             THROW 53011, 'Số điện thoại phải gồm đúng 10 chữ số và bắt đầu bằng 0.', 1;
+    END
 
-        -- Xử lý Tiền tố Quốc tế (+XX -> 0...)
-        IF LEFT(@phoneNo, 1) = '+' AND LEN(@phoneNo) >= 3
-        BEGIN
-            SET @phoneNo = '0' + SUBSTRING(@phoneNo, 4, LEN(@phoneNo));
-        END
-        
-        -- Kiểm tra độ dài (9-11 ký tự)
-        DECLARE @PhoneLength INT = LEN(@phoneNo);
-        IF @PhoneLength < 9 OR @PhoneLength > 11
-        BEGIN
-            RAISERROR(N'Lỗi: Số điện thoại phải có độ dài từ 9 đến 11 ký tự (sau khi xử lý mã quốc gia).', 16, 1);
-            RETURN;
-        END
-    END
-    -- Lưu ý: PhoneNo có thể là NULL, nên không cần RAISERROR nếu nó NULL/RỖNG.
+    -- *** 3. LOGIC EMAIL ***
+    SET @email = LTRIM(RTRIM(@email));
+    IF @email IS NULL OR @email = '' THROW 53005, 'Email không được rỗng.', 1;
+    IF LEN(@email) > 100 THROW 53006, 'Email tối đa 100 ký tự.', 1;
+    IF @email NOT LIKE '%_@_%._%' THROW 53007, 'Email phải có dạng <text>@<text>.<text>', 1;
+    IF EXISTS (SELECT 1 FROM dbo.[USER] WHERE email = @email)
+        THROW 53008, 'Email đã tồn tại.', 1;
 
-    -- C. KIỂM TRA RÀNG BUỘC CƠ BẢN (Email, Password, Role)
-    IF @email NOT LIKE '%_@_%._%' BEGIN
-        RAISERROR(N'Email phải có dạng <text>@<text>.<text>', 16, 1);
-        RETURN;
-    END
-    IF LEN(@password) < 6 BEGIN
-        RAISERROR(N'Lỗi: Mật khẩu phải có ít nhất 6 ký tự.', 16, 1);
-        RETURN;
-    END
-    IF @employeeRole IS NULL OR LTRIM(RTRIM(@employeeRole)) = '' BEGIN
-        RAISERROR(N'Lỗi: Phải cung cấp chức danh (@employeeRole) cho nhân viên.', 16, 1);
-        RETURN;
-    END
-    IF @employeeRole IS NOT NULL AND @employeeRole NOT IN ('ProductMgr', 'OrderMgr', 'CouponMgr')
-    BEGIN
-        RAISERROR(N'Lỗi: Chức danh không tồn tại hoặc không hợp lệ.', 16, 1);
-        RETURN;
-    END
+    -- *** 4. CHECK USERNAME ***
+    SET @username = LTRIM(RTRIM(@username));
+    IF @username IS NULL OR @username = '' THROW 53002, 'Username không được rỗng.', 1;
+    IF EXISTS (SELECT 1 FROM dbo.[USER] WHERE username = @username)
+        THROW 53004, 'Username đã tồn tại.', 1;
+
+    -- *** 5. CHECK KHÁC ***
+    IF LEN(@password) < 6 THROW 53009, 'Mật khẩu phải có ít nhất 6 ký tự.', 1;
+
+    -- Role cũng phải trim cẩn thận vì là NVARCHAR
+    SET @employeeRole = LTRIM(RTRIM(@employeeRole));
+    IF @employeeRole NOT IN (N'ProductMgr', N'OrderMgr', N'CouponMgr') -- Thêm N trước chuỗi
+        THROW 53020, 'Lỗi: Chức danh không tồn tại hoặc không hợp lệ.', 1;
     
-    -- *** 2. LOGIC GIAO DỊCH (TRANSACTION) ***
-    
+    -- *** TRANSACTION ***
     BEGIN TRANSACTION;
     BEGIN TRY
-        -- 3. INSERT vào bảng [USER]
         INSERT INTO [USER] (username, email, password, phoneNo, fullName, firstName, lastName, district, province, numAndStreet)
         VALUES (@username, @email, @password, @phoneNo, @fullName, @firstName, @lastName, @district, @province, @numAndStreet);
 
         SET @NewUserID = SCOPE_IDENTITY();
 
-        -- 4. INSERT vào bảng EMPLOYEE
         INSERT INTO EMPLOYEE (UserID, role) 
         VALUES (@NewUserID, @employeeRole);
 
         COMMIT TRANSACTION;
         
-        -- Trả về thông tin nhân viên vừa được tạo
         SELECT U.*, E.role AS EmployeeRole
         FROM [USER] U JOIN EMPLOYEE E ON U.UserID = E.UserID
+        WHERE U.UserID = @NewUserID;
+    END TRY
+    BEGIN CATCH
+        IF @@TRANCOUNT > 0 ROLLBACK TRANSACTION;
+        THROW;
+    END CATCH
+END
+GO
+
+CREATE OR ALTER PROCEDURE sp_InsertCustomer
+    @username VARCHAR(50),
+    @email VARCHAR(100),
+    @password VARCHAR(100),
+    @phoneNo VARCHAR(20) = NULL,
+    @fullName NVARCHAR(100) = NULL, -- Đã đổi sang NVARCHAR
+    @firstName NVARCHAR(50) = NULL, -- Đã đổi sang NVARCHAR
+    @lastName NVARCHAR(50) = NULL,  -- Đã đổi sang NVARCHAR
+    @district NVARCHAR(50) = NULL,  -- Đã đổi sang NVARCHAR
+    @province NVARCHAR(50) = NULL,  -- Đã đổi sang NVARCHAR
+    @numAndStreet NVARCHAR(100) = NULL, -- Đã đổi sang NVARCHAR
+    @loyaltyPoint INT = 0
+AS
+BEGIN
+    SET NOCOUNT ON;
+    DECLARE @NewUserID INT;
+    
+    -- *** 1. LOGIC TÊN ***
+    IF @fullName IS NULL OR LTRIM(RTRIM(@fullName)) = ''
+    BEGIN
+        SET @fullName = LTRIM(RTRIM(
+                          ISNULL(@firstName, '') + 
+                          CASE WHEN ISNULL(@firstName, '') != '' AND ISNULL(@lastName, '') != '' THEN ' ' ELSE '' END + 
+                          ISNULL(@lastName, '')
+                      ));
+    END
+
+    IF @fullName IS NULL OR LTRIM(RTRIM(@fullName)) = '' 
+        THROW 53012, 'Lỗi: Cần cung cấp ít nhất tên để tạo FullName.', 1;
+  
+    -- *** 2. LOGIC PHONENO (Bắt buộc với Customer) ***
+    IF @phoneNo IS NULL OR LTRIM(RTRIM(@phoneNo)) = ''
+        THROW 53010, 'Lỗi: Cần cung cấp số điện thoại cho khách hàng.', 1;
+
+    SET @phoneNo = LTRIM(RTRIM(@phoneNo));
+    IF @phoneNo NOT LIKE '0[0-9][0-9][0-9][0-9][0-9][0-9][0-9][0-9][0-9]'
+        THROW 53011, 'Số điện thoại phải gồm đúng 10 chữ số và bắt đầu bằng 0.', 1;
+
+    -- *** 3. LOGIC EMAIL ***
+    SET @email = LTRIM(RTRIM(@email));
+    IF @email IS NULL OR @email = '' THROW 53005, 'Email không được rỗng.', 1;
+    IF LEN(@email) > 100 THROW 53006, 'Email tối đa 100 ký tự.', 1;
+    IF @email NOT LIKE '%_@_%._%' THROW 53007, 'Email phải có dạng <text>@<text>.<text>', 1;
+    IF EXISTS (SELECT 1 FROM dbo.[USER] WHERE email = @email)
+        THROW 53008, 'Email đã tồn tại.', 1;
+
+    -- *** 4. CHECK USERNAME ***
+    SET @username = LTRIM(RTRIM(@username));
+    IF @username IS NULL OR @username = '' THROW 53002, 'Username không được rỗng.', 1;
+    IF EXISTS (SELECT 1 FROM dbo.[USER] WHERE username = @username)
+        THROW 53004, 'Username đã tồn tại.', 1;
+
+    -- *** 5. Password ***
+    IF LEN(@password) < 6 THROW 53009, 'Lỗi: Mật khẩu phải có ít nhất 6 ký tự.', 1;
+
+    -- *** TRANSACTION ***
+    BEGIN TRANSACTION; 
+    BEGIN TRY
+        INSERT INTO [USER] (username, email, password, phoneNo, fullName, firstName, lastName, district, province, numAndStreet)
+        VALUES (@username, @email, @password, @phoneNo, @fullName, @firstName, @lastName, @district, @province, @numAndStreet);
+
+        SET @NewUserID = SCOPE_IDENTITY();
+
+        INSERT INTO CUSTOMER (UserID, loyaltyPoint) 
+        VALUES (@NewUserID, @loyaltyPoint);
+
+        COMMIT TRANSACTION;
+    
+        SELECT U.*, C.loyaltyPoint, 'Customer' AS RoleType
+        FROM [USER] U JOIN CUSTOMER C ON U.UserID = C.UserID
         WHERE U.UserID = @NewUserID;
         
     END TRY
     BEGIN CATCH
-        IF @@TRANCOUNT > 0
-            ROLLBACK TRANSACTION;
+        IF @@TRANCOUNT > 0 ROLLBACK TRANSACTION;
         THROW;
-        RETURN;
     END CATCH
 END
 GO
@@ -225,12 +176,12 @@ CREATE OR ALTER PROC dbo.sp_UpdateUser
   @email       VARCHAR(100),
   @password    VARCHAR(100),
   @phoneNo     VARCHAR(20)  = NULL,
-  @fullName    VARCHAR(100) = NULL,
-  @firstName   VARCHAR(50)  = NULL,
-  @lastName    VARCHAR(50)  = NULL,
-  @district    VARCHAR(50)  = NULL,
-  @province    VARCHAR(50)  = NULL,
-  @numAndStreet VARCHAR(100)= NULL
+  @fullName    NVARCHAR(100) = NULL,
+  @firstName   NVARCHAR(50)  = NULL,
+  @lastName    NVARCHAR(50)  = NULL,
+  @district    NVARCHAR(50)  = NULL,
+  @province    NVARCHAR(50)  = NULL,
+  @numAndStreet NVARCHAR(100)= NULL
 AS
 BEGIN
   SET NOCOUNT ON;
@@ -291,14 +242,38 @@ BEGIN
   END
 
   /* 7) Validate các field text nullable (nếu nhập thì không được toàn khoảng trắng) */
-  IF @fullName IS NOT NULL AND @fullName = ''
-    THROW 53012, 'fullName không hợp lệ (chuỗi rỗng). Dùng NULL nếu muốn xóa.', 1;
 
   IF @firstName IS NOT NULL AND @firstName = ''
     THROW 53013, 'firstName không hợp lệ (chuỗi rỗng). Dùng NULL nếu muốn xóa.', 1;
 
   IF @lastName IS NOT NULL AND @lastName = ''
     THROW 53014, 'lastName không hợp lệ (chuỗi rỗng). Dùng NULL nếu muốn xóa.', 1;
+
+  IF @fullName IS NULL OR LTRIM(RTRIM(@fullName)) = ''
+  BEGIN
+      -- Lưu ý: Logic này giả định người dùng muốn update dựa trên tham số truyền vào.
+      -- Nếu tham số firstName/lastName cũng NULL thì fullName sẽ có thể thành chuỗi rỗng.
+      SET @fullName = LTRIM(RTRIM(
+                          ISNULL(@firstName, '') + 
+                          CASE 
+                            WHEN ISNULL(@firstName, '') != '' AND ISNULL(@lastName, '') != '' THEN ' ' 
+                            ELSE '' 
+                          END + 
+                          ISNULL(@lastName, '')
+                      ));
+  END
+  ELSE 
+  BEGIN
+      -- Nếu có truyền fullName thì chỉ cần Trim
+      SET @fullName = LTRIM(RTRIM(@fullName));
+  END
+
+  /* ... Các bước Validate 3, 4, 5, 6 giữ nguyên ... */
+
+  /* 7) Validate các field text nullable */
+  -- Logic này sẽ chặn nếu sau khi ghép mà fullName vẫn rỗng (nghĩa là cả 3 biến đều null/rỗng)
+  IF @fullName IS NOT NULL AND @fullName = ''
+    THROW 53012, 'fullName không hợp lệ (không thể tạo từ firstName/lastName rỗng).', 1;
 
   IF @district IS NOT NULL AND @district = ''
     THROW 53015, 'district không hợp lệ (chuỗi rỗng). Dùng NULL nếu muốn xóa.', 1;
@@ -424,7 +399,7 @@ BEGIN
 END;
 GO
 
-CREATE OR ALTER PROCEDURE SP_GetBestSellers
+/*CREATE OR ALTER PROCEDURE SP_GetBestSellers
     @MinSoldQuantity INT = 1 -- Chỉ lấy SP bán được ít nhất 1 cái (Dùng HAVING)
 AS
 BEGIN
@@ -449,6 +424,39 @@ BEGIN
         P.prodID, P.name, V.color, V.imageUrl, V.listedPrice -- Group By
     HAVING 
         SUM(OI.quantity) >= @MinSoldQuantity -- Having
+    ORDER BY 
+        TotalSold DESC;
+END;
+GO*/
+USE [BTL2];
+GO
+
+CREATE OR ALTER PROCEDURE SP_GetBestSellers
+    @MinSoldQuantity INT = 1
+AS
+BEGIN
+    SET NOCOUNT ON;
+
+    SELECT TOP 4
+        P.prodID,
+        P.name AS productName,
+        V.color,
+        V.unitOfMeasure, -- [MỚI] Thêm cột này
+        V.imageUrl,
+        V.listedPrice,
+        SUM(OI.quantity) AS TotalSold
+    FROM 
+        dbo.ORDERITEM OI
+    INNER JOIN 
+        dbo.VARIETY V ON OI.prodID = V.prodID 
+                      AND OI.color = V.color 
+                      AND OI.unitOfMeasure = V.unitOfMeasure
+    INNER JOIN 
+        dbo.PRODUCT P ON V.prodID = P.prodID
+    GROUP BY 
+        P.prodID, P.name, V.color, V.unitOfMeasure, V.imageUrl, V.listedPrice -- [MỚI] Thêm vào Group By
+    HAVING 
+        SUM(OI.quantity) >= @MinSoldQuantity
     ORDER BY 
         TotalSold DESC;
 END;

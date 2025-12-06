@@ -1,4 +1,3 @@
-// App.jsx
 import { Routes, Route } from "react-router-dom";
 import MainLayout from "./layouts/MainLayout";
 import AdminLayout from "./layouts/AdminLayout";
@@ -6,35 +5,28 @@ import AdminLayout from "./layouts/AdminLayout";
 import Home from "./pages/customer/Home";
 import Login from "./pages/auth/Login";
 import Register from "./pages/auth/Register";
+import Cart from "./pages/customer/Cart"; 
 
-// --- Admin Pages (Manager) ---
-import Dashboard from "./pages/admin/Dashboard";
+import Dashboard from "./pages/admin/DashBoard"; 
 import CustomerManager from "./pages/admin/CustomerManager";
 import EmployeeManager from "./pages/admin/EmployeeManager";
 
 import ProtectedRoute from "./components/ProtectedRoute";
-
 import { ToastContainer } from "react-toastify";
+
+// --- XÓA CÁC DÒNG CODE BACKEND Ở ĐÂY NẾU CÒN ---
 
 export default function App() {
   return (
     <div>
       <Routes>
-        {/* =========================================
-            PHÂN HỆ CUSTOMER (PUBLIC)
-           ========================================= */}
         <Route path="/" element={<MainLayout />}>
           <Route index element={<Home />} />
           <Route path="login" element={<Login />} />
           <Route path="register" element={<Register />} />
-          {/* <Route path="product/:id" element={<ProductDetail />} /> */}
-          {/* <Route path="cart" element={<Cart />} /> */}
+          <Route path="cart" element={<Cart />} /> 
         </Route>
 
-        {/* =========================================
-            PHÂN HỆ ADMIN (PRIVATE/MANAGER)
-           ========================================= */}
-        {/* Bọc trong ProtectedRoute để chặn khách hàng truy cập vào admin */}
         <Route
           path="/admin"
           element={
@@ -43,11 +35,9 @@ export default function App() {
             </ProtectedRoute>
           }
         >
-          <Route index element={<Dashboard />} /> {/* /admin */}
-          <Route path="customers" element={<CustomerManager />} />{" "}
-          {/* /admin/customers */}
-          <Route path="employees" element={<EmployeeManager />} />{" "}
-          {/* /admin/employees */}
+          <Route index element={<Dashboard />} />
+          <Route path="customers" element={<CustomerManager />} />
+          <Route path="employees" element={<EmployeeManager />} />
         </Route>
       </Routes>
 
