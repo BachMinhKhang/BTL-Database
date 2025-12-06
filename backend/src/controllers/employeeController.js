@@ -9,7 +9,6 @@ export const updateEmployee = async (req, res) => {
       email,
       password,
       phoneNo,
-      fullName,
       firstName,
       lastName,
       district,
@@ -23,7 +22,7 @@ export const updateEmployee = async (req, res) => {
         message: "Cần cung cấp username, email và password",
       });
     }
-
+    let fullName = lastName + firstName;
     await Employee.update({
       userId: id,
       username,
@@ -53,7 +52,9 @@ export const deleteEmployee = async (req, res) => {
     res.json({ message: "Xóa nhân viên thành công!" });
   } catch (error) {
     res.status(400).json({
-      message: "Không thể xóa nhân viên này (có thể do ràng buộc dữ liệu): " + error.message,
+      message:
+        "Không thể xóa nhân viên này (có thể do ràng buộc dữ liệu): " +
+        error.message,
     });
   }
 };

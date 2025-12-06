@@ -36,6 +36,7 @@ export default function CustomerManager() {
     district: "",
     province: "",
     numAndStreet: "",
+    role: "customer",
     loyaltyPoint: 0,
   });
 
@@ -123,7 +124,7 @@ export default function CustomerManager() {
       setShowModal(false);
       fetchCustomers();
     } catch (error) {
-      toast.error(error.message || "Có lỗi xảy ra");
+      toast.error(error.response?.data?.message || "Có lỗi xảy ra");
     }
   };
 

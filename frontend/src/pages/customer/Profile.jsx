@@ -2,7 +2,11 @@ import { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
 import { getCurrentUser, logout } from "../../services/authService";
-import { getCustomers, updateCustomer, deleteCustomer } from "../../services/customerService";
+import {
+  getCustomers,
+  updateCustomer,
+  deleteCustomer,
+} from "../../services/customerService";
 
 const pickId = (u) => u?.UserID ?? u?.userId ?? u?.id ?? u?.userid;
 
@@ -20,7 +24,7 @@ export default function Profile() {
     email: "",
     password: "", // để trống = không đổi (nếu backend cho phép)
     phoneNo: "",
-    fullName: "",
+
     firstName: "",
     lastName: "",
     district: "",
@@ -42,8 +46,9 @@ export default function Profile() {
         // API customers là GET list + search -> mình search theo username rồi tìm đúng ID
         const list = await getCustomers({ keyword: currentUser.username });
         const found =
-          (Array.isArray(list) ? list : []).find((c) => (c.UserID ?? c.userId ?? c.id) === userId) ||
-          (Array.isArray(list) ? list : [])[0];
+          (Array.isArray(list) ? list : []).find(
+            (c) => (c.UserID ?? c.userId ?? c.id) === userId
+          ) || (Array.isArray(list) ? list : [])[0];
 
         const src = found;
 
@@ -53,7 +58,6 @@ export default function Profile() {
           email: src.email ?? "",
           password: "",
           phoneNo: src.phoneNo ?? "",
-          fullName: src.fullName ?? "",
           firstName: src.firstName ?? "",
           lastName: src.lastName ?? "",
           district: src.district ?? "",
@@ -62,7 +66,6 @@ export default function Profile() {
           loyaltyPoint: src.loyaltyPoint ?? 0,
         }));
       } catch (e) {
-        
       } finally {
         setLoading(false);
       }
@@ -71,7 +74,8 @@ export default function Profile() {
     boot();
   }, [currentUser, userId, navigate]);
 
-  const onChange = (key) => (e) => setForm((p) => ({ ...p, [key]: e.target.value }));
+  const onChange = (key) => (e) =>
+    setForm((p) => ({ ...p, [key]: e.target.value }));
 
   const handleSave = async (e) => {
     e.preventDefault();
@@ -79,7 +83,8 @@ export default function Profile() {
 
     // payload: nếu password rỗng thì không gửi (đỡ “reset” password)
     const payload = { ...form };
-    if (!payload.password || payload.password.trim() === "") delete payload.password;
+    if (!payload.password || payload.password.trim() === "")
+      delete payload.password;
 
     setSaving(true);
     try {
@@ -95,7 +100,7 @@ export default function Profile() {
       localStorage.setItem("user", JSON.stringify(newUser));
       window.dispatchEvent(new Event("userUpdated"));
     } catch (err) {
-      toast.error(err?.message || "Cập nhật thất bại!");
+      toast.error(err.response?.data?.message || "Cập nhật thất bại!");
     } finally {
       setSaving(false);
     }
@@ -118,7 +123,10 @@ export default function Profile() {
       window.dispatchEvent(new Event("userUpdated"));
       navigate("/login");
     } catch (err) {
-      toast.error(err?.message || "Không thể xóa tài khoản (có thể do ràng buộc dữ liệu).");
+      toast.error(
+        err.response?.data?.message ||
+          "Không thể xóa tài khoản (có thể do ràng buộc dữ liệu)."
+      );
     }
   };
 
@@ -134,8 +142,12 @@ export default function Profile() {
             <div>
               <h1 className="text-2xl font-bold">Hồ sơ khách hàng</h1>
               <p className="text-gray-500 mt-1">
-                UserID: <span className="font-medium text-gray-700">{userId}</span> · Loyalty point:{" "}
-                <span className="font-medium text-gray-700">{form.loyaltyPoint}</span>
+                UserID:{" "}
+                <span className="font-medium text-gray-700">{userId}</span> ·
+                Loyalty point:{" "}
+                <span className="font-medium text-gray-700">
+                  {form.loyaltyPoint}
+                </span>
               </p>
             </div>
 
@@ -148,10 +160,24 @@ export default function Profile() {
           </div>
         </div>
 
-        <form onSubmit={handleSave} className="bg-white rounded-2xl border border-gray-100 shadow-sm p-6">
+        <form
+          onSubmit={handleSave}
+          className="bg-white rounded-2xl border border-gray-100 shadow-sm p-6"
+        >
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <Field label="Username" value={form.username} onChange={onChange("username")} required />
-            <Field label="Email" type="email" value={form.email} onChange={onChange("email")} required />
+            <Field
+              label="Username"
+              value={form.username}
+              onChange={onChange("username")}
+              required
+            />
+            <Field
+              label="Email"
+              type="email"
+              value={form.email}
+              onChange={onChange("email")}
+              required
+            />
 
             <Field
               label="Mật khẩu (bỏ trống nếu không đổi)"
@@ -160,20 +186,41 @@ export default function Profile() {
               onChange={onChange("password")}
               placeholder="••••••••"
             />
-            <Field label="Số điện thoại" value={form.phoneNo} onChange={onChange("phoneNo")} />
+            <Field
+              label="Số điện thoại"
+              value={form.phoneNo}
+              onChange={onChange("phoneNo")}
+            />
 
-            <Field label="Họ và tên" value={form.fullName} onChange={onChange("fullName")} />
             <div className="grid grid-cols-2 gap-4">
-              <Field label="First name" value={form.firstName} onChange={onChange("firstName")} />
-              <Field label="Last name" value={form.lastName} onChange={onChange("lastName")} />
+              <Field
+                label="First name"
+                value={form.firstName}
+                onChange={onChange("firstName")}
+              />
+              <Field
+                label="Last name"
+                value={form.lastName}
+                onChange={onChange("lastName")}
+              />
             </div>
 
-            <Field label="Tỉnh/TP" value={form.province} onChange={onChange("province")} />
-            <Field label="Quận/Huyện" value={form.district} onChange={onChange("district")} />
+            <Field
+              label="Tỉnh/TP"
+              value={form.province}
+              onChange={onChange("province")}
+            />
+            <Field
+              label="Quận/Huyện"
+              value={form.district}
+              onChange={onChange("district")}
+            />
 
-            <div className="md:col-span-2">
-              <Field label="Số nhà + Đường" value={form.numAndStreet} onChange={onChange("numAndStreet")} />
-            </div>
+            <Field
+              label="Số nhà + Đường"
+              value={form.numAndStreet}
+              onChange={onChange("numAndStreet")}
+            />
           </div>
 
           <div className="flex justify-end gap-3 mt-6">
@@ -198,7 +245,14 @@ export default function Profile() {
   );
 }
 
-function Field({ label, value, onChange, type = "text", required, placeholder }) {
+function Field({
+  label,
+  value,
+  onChange,
+  type = "text",
+  required,
+  placeholder,
+}) {
   return (
     <label className="block">
       <div className="text-sm font-medium text-gray-700 mb-1">{label}</div>
