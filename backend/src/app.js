@@ -6,8 +6,10 @@ import { connectDB } from "./config/database.js";
 // Import Routes
 import authRoutes from "./routes/authRoutes.js";
 import customerRoutes from "./routes/customerRoutes.js";
+import employeeRoutes from "./routes/employeeRoutes.js";
 import productRoutes from "./routes/productRoutes.js";
 import reportRoutes from "./routes/reportRoutes.js";
+import userRoutes from "./routes/userRoutes.js";
 import orderRoutes from "./routes/orderRoutes.js"; // [Đã thêm]
 
 dotenv.config();
@@ -20,7 +22,9 @@ app.use(express.json());
 
 // Routes
 app.use("/api/auth", authRoutes);
+app.use("/api/users", userRoutes);
 app.use("/api/customers", customerRoutes);
+app.use("/api/employees", employeeRoutes);
 app.use("/api/products", productRoutes);
 app.use("/api/reports", reportRoutes);
 app.use("/api/orders", orderRoutes); // [Đã thêm]
@@ -44,7 +48,7 @@ const startServer = async () => {
     });
   } catch (error) {
     console.error("❌ Không thể khởi động server:", error);
-    process.exit(1); // Tắt chương trình nếu lỗi
+    process.exit(1);
   }
 };
 

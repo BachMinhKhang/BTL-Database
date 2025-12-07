@@ -36,11 +36,6 @@ export default function AdminLayout() {
       icon: <HiUsers size={20} />,
     },
     {
-      path: "/admin/employees",
-      label: "Quản lý Nhân viên",
-      icon: <HiUserGroup size={20} />,
-    },
-    {
       path: "/admin/profile",
       label: "Profile",
       icon: <HiChartPie size={20} />,

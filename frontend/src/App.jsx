@@ -10,7 +10,6 @@ import Cart from "./pages/customer/Cart";
 
 import Dashboard from "./pages/admin/DashBoard"; 
 import CustomerManager from "./pages/admin/CustomerManager";
-import EmployeeManager from "./pages/admin/EmployeeManager";
 import AdminProfile from "./pages/admin/Profile";
 
 import ProtectedRoute from "./components/ProtectedRoute";
@@ -37,9 +36,10 @@ export default function App() {
             </ProtectedRoute>
           }
         >
-          <Route index element={<Dashboard />} />
-          <Route path="customers" element={<CustomerManager />} />
-          <Route path="employees" element={<EmployeeManager />} />
+          <Route index element={<Dashboard />} /> {/* /admin */}
+          <Route path="customers" element={<CustomerManager />} />{" "}
+          {/* /admin/customers */}
+          <Route path="profile" element={<AdminProfile />} />
         </Route>
       </Routes>
 

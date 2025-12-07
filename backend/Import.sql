@@ -48,7 +48,7 @@ INSERT INTO CATALOGLIST(catalogID, catalogName, parentCatalogID) VALUES
 SET IDENTITY_INSERT CATALOGLIST OFF;
 GO
 
-/* ---- 2.5 Insert PRODUCT (10 Sản phẩm VPP) ---- */
+/* ---- 2.5 Insert PRODUCT (Sản phẩm VPP) ---- */
 SET IDENTITY_INSERT PRODUCT ON;
 INSERT INTO PRODUCT(prodID, catalogID, name, description, placeOfProduction, origin) VALUES
 (1, 2, N'Bút bi Thiên Long TL-027', N'Bút bi đầu nhỏ, mực đều', N'Việt Nam', N'Việt Nam'),
@@ -123,7 +123,7 @@ INSERT INTO PROVIDE(supplierID, prodID) VALUES
 (4,5), (4,8); -- Deli cung cấp sổ, kéo
 GO
 
-/* ---- 2.9 Insert CARRIER (Giữ nguyên) ---- */
+/* ---- 2.9 Insert CARRIER ---- */
 SET IDENTITY_INSERT CARRIER ON;
 INSERT INTO CARRIER(carrierID, name, phone) VALUES
 (1, N'Giao Hàng Nhanh', '0911000111'),
@@ -141,7 +141,7 @@ INSERT INTO CART(CartID, cartState, UserID) VALUES
 SET IDENTITY_INSERT CART OFF;
 GO
 
-/* ---- 2.11 Insert CARTITEM (Sửa lại cho khớp ID sản phẩm mới) ---- */
+/* ---- 2.11 Insert CARTITEM ---- */
 INSERT INTO CARTITEM(CartID, quantity, ordinalNumber, color, unitOfMeasure, prodID) VALUES
 (1, 10, 1, N'Xanh', N'Cây', 1),         -- Tùng mua 10 cây bút bi
 (1, 2, 2, N'Trắng (70gsm)', N'Ram', 2), -- Tùng mua 2 ram giấy
@@ -150,7 +150,7 @@ INSERT INTO CARTITEM(CartID, quantity, ordinalNumber, color, unitOfMeasure, prod
 (5, 3, 1, N'Xanh dương', N'Cái', 4);    -- Cường mua 3 bìa còng
 GO
 
-/* ---- 2.12 Insert COUPON (Giữ nguyên logic) ---- */
+/* ---- 2.12 Insert COUPON ---- */
 SET IDENTITY_INSERT COUPON ON;
 INSERT INTO COUPON(CouponID, employeeID, description, discountPercent, discountedPrice, startDate, endDate) VALUES
 (1, 9, N'Mừng Xuân 2025 - Giảm 10%', 10, NULL, '2025-01-01','2025-01-31'),

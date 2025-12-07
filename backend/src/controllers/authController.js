@@ -11,8 +11,9 @@ export const register = async (req, res) => {
     username,
     email,
     password,
-    fullName,
-    phone,
+    firstName,
+    lastName,
+    phoneNo,
     role, // 'customer' | 'employee'
   } = req.body;
 
@@ -23,15 +24,17 @@ export const register = async (req, res) => {
     }
 
     let newUser = null;
-
+    let fullName = lastName + " " + firstName;
     // 2. Gọi Model để thực thi Stored Procedure
     if (role === "customer") {
       newUser = await Customer.register({
         username,
         email,
         password,
+        firstName,
+        lastName,
         fullName,
-        phone,
+        phoneNo,
       });
     } else {
       // Logic cho Employee: Cần role cụ thể (ProductMgr, OrderMgr, CouponMgr)
@@ -43,8 +46,10 @@ export const register = async (req, res) => {
         username,
         email,
         password,
+        firstName,
+        lastName,
         fullName,
-        phone,
+        phoneNo,
         role: specificRole,
       });
     }
@@ -79,18 +84,22 @@ export const login = async (req, res) => {
     const user = await User.findByUsername(username);
 
     if (!user) {
-      return res.status(400).json({ message: "Sai tên đăng nhập hoặc mật khẩu" });
+      return res
+        .status(400)
+        .json({ message: "Sai tên đăng nhập hoặc mật khẩu" });
     }
 
-    // 2. Check password 
+    // 2. Check password
     // (Lưu ý: Nếu bạn chưa hash password trong SP thì so sánh string thường)
     if (password !== user.password) {
-      return res.status(400).json({ message: "Sai tên đăng nhập hoặc mật khẩu" });
+      return res
+        .status(400)
+        .json({ message: "Sai tên đăng nhập hoặc mật khẩu" });
     }
 
     // 3. Xác định role cụ thể
     let roleName = null;
-    let finalRoleForToken = "customer"; 
+    let finalRoleForToken = "customer";
 
     // Kiểm tra bảng Customer
     const customerRecord = await Customer.findById(user.UserID);
@@ -127,8 +136,9 @@ export const login = async (req, res) => {
         id: user.UserID,
         username: user.username,
         email: user.email,
-        fullName: user.fullName,
+        firstName: user.firstName,
         role: roleName,
+        loyaltyPoint: customerRecord?.loyaltyPoint,
       },
     });
   } catch (err) {

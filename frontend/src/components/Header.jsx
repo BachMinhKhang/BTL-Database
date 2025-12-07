@@ -18,7 +18,18 @@ export default function Header() {
   useEffect(() => {
     const updateUser = () => setUser(getCurrentUser());
     window.addEventListener("auth-change", updateUser);
-    return () => window.removeEventListener("auth-change", updateUser);
+    return () => {
+      window.removeEventListener("auth-change", updateUser);
+    };
+  }, []);
+
+  useEffect(() => {
+    const updateUser = () => setUser(getCurrentUser());
+
+    window.addEventListener("userUpdated", updateUser);
+    return () => {
+      window.removeEventListener("userUpdated", updateUser);
+    };
   }, []);
 
   // Ẩn header khi scroll xuống
@@ -55,9 +66,11 @@ export default function Header() {
           <Link className="hover:text-blue-500 transition" to="/cart">
             Cart
           </Link>
-          <Link className="hover:text-blue-500 transition" to="/profile"> {/*Này bỏ tạm đây, khi nào quẳng chỗ khác thì quẳng =))*/}
+          <Link className="hover:text-blue-500 transition" to="/profile">
+            {" "}
+            {/*Này bỏ tạm đây, khi nào quẳng chỗ khác thì quẳng =))*/}
             Profile
-          </Link> 
+          </Link>
         </nav>
 
         {/* User Section */}
