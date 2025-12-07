@@ -508,7 +508,6 @@ BEGIN
     LEFT JOIN 
         dbo.[ORDER] O ON C.UserID = O.customerID AND O.stateOfOrder != 'Cancelled'
     GROUP BY 
-        -- Nhớ Group By đủ các cột đã Select
         U.UserID, U.username, U.email, U.fullName, U.firstName, U.lastName, 
         U.phoneNo, U.district, U.province, U.numAndStreet, C.loyaltyPoint
     
@@ -520,7 +519,7 @@ BEGIN
     ORDER BY 
         CASE WHEN @SortBy = 'Spent' THEN ISNULL(SUM(O.finalPrice), 0) END DESC,
         CASE WHEN @SortBy = 'Orders' THEN COUNT(O.OrderID) END DESC,
-        CASE WHEN @SortBy = 'Name' THEN U.fullName END ASC,
+        CASE WHEN @SortBy = 'Name' THEN U.firstName END ASC,
         CASE WHEN @SortBy = 'Newest' THEN U.UserID END DESC,
         CASE WHEN @SortBy = 'LoyaltyPoint' THEN C.loyaltyPoint END DESC,
         U.UserID ASC;
