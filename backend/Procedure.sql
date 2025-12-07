@@ -176,12 +176,12 @@ CREATE OR ALTER PROC dbo.sp_UpdateUser
   @email       VARCHAR(100),
   @password    VARCHAR(100),
   @phoneNo     VARCHAR(20)  = NULL,
-  @fullName    NVARCHAR(100) = NULL, -- Đã đổi sang NVARCHAR
-  @firstName   NVARCHAR(50)  = NULL, -- Đã đổi sang NVARCHAR
-  @lastName    NVARCHAR(50)  = NULL, -- Đã đổi sang NVARCHAR
-  @district    NVARCHAR(50)  = NULL, -- Đã đổi sang NVARCHAR
-  @province    NVARCHAR(50)  = NULL, -- Đã đổi sang NVARCHAR
-  @numAndStreet NVARCHAR(100)= NULL  -- Đã đổi sang NVARCHAR
+  @fullName    NVARCHAR(100) = NULL,
+  @firstName   NVARCHAR(50)  = NULL,
+  @lastName    NVARCHAR(50)  = NULL,
+  @district    NVARCHAR(50)  = NULL,
+  @province    NVARCHAR(50)  = NULL,
+  @numAndStreet NVARCHAR(100)= NULL
 AS
 BEGIN
   SET NOCOUNT ON;
@@ -241,13 +241,48 @@ BEGIN
       THROW 53011, 'Số điện thoại phải gồm đúng 10 chữ số và bắt đầu bằng 0.', 1;
   END
 
-  /* 7) Validate rỗng cho NVARCHAR */
-  IF @fullName IS NOT NULL AND @fullName = '' THROW 53012, 'fullName không hợp lệ (chuỗi rỗng).', 1;
-  IF @firstName IS NOT NULL AND @firstName = '' THROW 53013, 'firstName không hợp lệ (chuỗi rỗng).', 1;
-  IF @lastName IS NOT NULL AND @lastName = '' THROW 53014, 'lastName không hợp lệ (chuỗi rỗng).', 1;
-  IF @district IS NOT NULL AND @district = '' THROW 53015, 'district không hợp lệ (chuỗi rỗng).', 1;
-  IF @province IS NOT NULL AND @province = '' THROW 53016, 'province không hợp lệ (chuỗi rỗng).', 1;
-  IF @numAndStreet IS NOT NULL AND @numAndStreet = '' THROW 53017, 'numAndStreet không hợp lệ (chuỗi rỗng).', 1;
+  /* 7) Validate các field text nullable (nếu nhập thì không được toàn khoảng trắng) */
+
+  IF @firstName IS NOT NULL AND @firstName = ''
+    THROW 53013, 'firstName không hợp lệ (chuỗi rỗng). Dùng NULL nếu muốn xóa.', 1;
+
+  IF @lastName IS NOT NULL AND @lastName = ''
+    THROW 53014, 'lastName không hợp lệ (chuỗi rỗng). Dùng NULL nếu muốn xóa.', 1;
+
+  IF @fullName IS NULL OR LTRIM(RTRIM(@fullName)) = ''
+  BEGIN
+      -- Lưu ý: Logic này giả định người dùng muốn update dựa trên tham số truyền vào.
+      -- Nếu tham số firstName/lastName cũng NULL thì fullName sẽ có thể thành chuỗi rỗng.
+      SET @fullName = LTRIM(RTRIM(
+                          ISNULL(@firstName, '') + 
+                          CASE 
+                            WHEN ISNULL(@firstName, '') != '' AND ISNULL(@lastName, '') != '' THEN ' ' 
+                            ELSE '' 
+                          END + 
+                          ISNULL(@lastName, '')
+                      ));
+  END
+  ELSE 
+  BEGIN
+      -- Nếu có truyền fullName thì chỉ cần Trim
+      SET @fullName = LTRIM(RTRIM(@fullName));
+  END
+
+  /* ... Các bước Validate 3, 4, 5, 6 giữ nguyên ... */
+
+  /* 7) Validate các field text nullable */
+  -- Logic này sẽ chặn nếu sau khi ghép mà fullName vẫn rỗng (nghĩa là cả 3 biến đều null/rỗng)
+  IF @fullName IS NOT NULL AND @fullName = ''
+    THROW 53012, 'fullName không hợp lệ (không thể tạo từ firstName/lastName rỗng).', 1;
+
+  IF @district IS NOT NULL AND @district = ''
+    THROW 53015, 'district không hợp lệ (chuỗi rỗng). Dùng NULL nếu muốn xóa.', 1;
+
+  IF @province IS NOT NULL AND @province = ''
+    THROW 53016, 'province không hợp lệ (chuỗi rỗng). Dùng NULL nếu muốn xóa.', 1;
+
+  IF @numAndStreet IS NOT NULL AND @numAndStreet = ''
+    THROW 53017, 'numAndStreet không hợp lệ (chuỗi rỗng). Dùng NULL nếu muốn xóa.', 1;
 
   /* 8) Update */
   UPDATE dbo.[USER]
@@ -373,8 +408,8 @@ BEGIN
 END;
 GO
 
-CREATE OR ALTER PROCEDURE SP_GetBestSellers
-    @MinSoldQuantity INT = 1 
+/*CREATE OR ALTER PROCEDURE SP_GetBestSellers
+    @MinSoldQuantity INT = 1 -- Chỉ lấy SP bán được ít nhất 1 cái (Dùng HAVING)
 AS
 BEGIN
     SET NOCOUNT ON;
@@ -398,6 +433,39 @@ BEGIN
         P.prodID, P.name, V.color, V.imageUrl, V.listedPrice 
     HAVING 
         SUM(OI.quantity) >= @MinSoldQuantity 
+    ORDER BY 
+        TotalSold DESC;
+END;
+GO*/
+USE [BTL2];
+GO
+
+CREATE OR ALTER PROCEDURE SP_GetBestSellers
+    @MinSoldQuantity INT = 1
+AS
+BEGIN
+    SET NOCOUNT ON;
+
+    SELECT TOP 4
+        P.prodID,
+        P.name AS productName,
+        V.color,
+        V.unitOfMeasure, -- [MỚI] Thêm cột này
+        V.imageUrl,
+        V.listedPrice,
+        SUM(OI.quantity) AS TotalSold
+    FROM 
+        dbo.ORDERITEM OI
+    INNER JOIN 
+        dbo.VARIETY V ON OI.prodID = V.prodID 
+                      AND OI.color = V.color 
+                      AND OI.unitOfMeasure = V.unitOfMeasure
+    INNER JOIN 
+        dbo.PRODUCT P ON V.prodID = P.prodID
+    GROUP BY 
+        P.prodID, P.name, V.color, V.unitOfMeasure, V.imageUrl, V.listedPrice -- [MỚI] Thêm vào Group By
+    HAVING 
+        SUM(OI.quantity) >= @MinSoldQuantity
     ORDER BY 
         TotalSold DESC;
 END;

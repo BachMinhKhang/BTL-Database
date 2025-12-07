@@ -10,6 +10,7 @@ import employeeRoutes from "./routes/employeeRoutes.js";
 import productRoutes from "./routes/productRoutes.js";
 import reportRoutes from "./routes/reportRoutes.js";
 import userRoutes from "./routes/userRoutes.js";
+import orderRoutes from "./routes/orderRoutes.js"; // [Đã thêm]
 
 dotenv.config();
 
@@ -26,6 +27,7 @@ app.use("/api/customers", customerRoutes);
 app.use("/api/employees", employeeRoutes);
 app.use("/api/products", productRoutes);
 app.use("/api/reports", reportRoutes);
+app.use("/api/orders", orderRoutes); // [Đã thêm]
 
 // Health check
 app.get("/api/health", (req, res) => {

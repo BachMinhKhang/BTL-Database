@@ -1,39 +1,60 @@
 import { sql } from "../config/database.js";
 
-export const createOrderItem = async (req, res) => {
-  const { orderID, prodID, color, unitOfMeasure, quantity, price } = req.body;
+export const createOrder = async (req, res) => {
+  const { customerID, items, totalPrice, address } = req.body;
+
+  const transaction = new sql.Transaction();
 
   try {
-    const request = new sql.Request();
-    
-    // Truyền tham số
-    request.input("OrderID", sql.Int, orderID);
-    request.input("ProdID", sql.Int, prodID);
-    request.input("Color", sql.NVarChar, color);
-    request.input("Unit", sql.NVarChar, unitOfMeasure);
-    request.input("Qty", sql.Int, quantity);
-    request.input("Price", sql.Decimal(12, 2), price);
+    await transaction.begin();
 
-    // --- KHI CHẠY CÂU LỆNH NÀY, TRIGGER SẼ TỰ ĐỘNG CHẠY ---
-    await request.query(`
-      INSERT INTO ORDERITEM (OrderID, prodID, color, unitOfMeasure, quantity, priceInOrderDate, ordinalNo)
-      VALUES (@OrderID, @ProdID, @Color, @Unit, @Qty, @Price, 1) 
-      -- (ordinalNo giả định là 1 cho ví dụ đơn giản)
+    // 1. Tạo Đơn hàng mới (Bảng [ORDER])
+    // Lưu ý: employeeID tạm thời hardcode là 6 (nhân viên bán hàng) vì DB yêu cầu not null
+    const requestOrder = new sql.Request(transaction);
+    requestOrder.input("CustomerID", sql.Int, customerID);
+    requestOrder.input("FinalPrice", sql.Decimal(12, 2), totalPrice);
+    requestOrder.input("Address", sql.NVarChar, address || "Tại cửa hàng");
+    
+    const orderResult = await requestOrder.query(`
+      INSERT INTO [ORDER] (customerID, employeeID, orderDate, finalPrice, stateOfOrder, addrToShip)
+      OUTPUT INSERTED.OrderID
+      VALUES (@CustomerID, 6, GETDATE(), @FinalPrice, 'New', @Address)
     `);
 
-    res.status(201).json({ message: "Thêm sản phẩm vào đơn thành công!" });
+    const newOrderID = orderResult.recordset[0].OrderID;
 
-  } catch (error) {
-    console.error("Lỗi tạo đơn:", error);
+    // 2. Thêm từng sản phẩm vào OrderItem
+    for (let i = 0; i < items.length; i++) {
+      const item = items[i];
+      const requestItem = new sql.Request(transaction);
+      
+      requestItem.input("OrderID", sql.Int, newOrderID);
+      requestItem.input("ProdID", sql.Int, item.prodID);
+      requestItem.input("Color", sql.NVarChar, item.color);
+      requestItem.input("Unit", sql.NVarChar, item.unitOfMeasure);
+      requestItem.input("Qty", sql.Int, item.quantity);
+      requestItem.input("Price", sql.Decimal(12, 2), item.price);
+      requestItem.input("Ordinal", sql.Int, i + 1); // Số thứ tự: 1, 2, 3...
 
-    // --- BẮT LỖI TỪ TRIGGER ---
-    // Nếu Trigger RAISERROR, nó sẽ nhảy vào đây
-    if (error.message.includes("Không đủ số lượng tồn kho")) {
-        return res.status(400).json({ 
-            message: "Lỗi: Sản phẩm này không đủ số lượng tồn kho!" 
-        });
+      // Query này sẽ kích hoạt TRIGGER kiểm tra tồn kho
+      await requestItem.query(`
+        INSERT INTO ORDERITEM (OrderID, prodID, color, unitOfMeasure, ordinalNo, quantity, priceInOrderDate)
+        VALUES (@OrderID, @ProdID, @Color, @Unit, @Ordinal, @Qty, @Price)
+      `);
     }
 
+    await transaction.commit();
+    res.status(201).json({ message: "Đặt hàng thành công!", orderID: newOrderID });
+
+  } catch (error) {
+    await transaction.rollback();
+    console.error("Lỗi tạo đơn:", error);
+
+    // Bắt lỗi từ Trigger (nếu hết hàng)
+    if (error.message.includes("Không đủ số lượng tồn kho")) {
+      return res.status(400).json({ message: error.message }); // Gửi thông báo trigger về client
+    }
+    
     res.status(500).json({ message: "Lỗi server: " + error.message });
   }
 };
