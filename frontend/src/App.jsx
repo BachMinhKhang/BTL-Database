@@ -6,9 +6,9 @@ import Home from "./pages/customer/Home";
 import CustomerProfile from "./pages/customer/Profile";
 import Login from "./pages/auth/Login";
 import Register from "./pages/auth/Register";
-import Cart from "./pages/customer/Cart"; 
+import Cart from "./pages/customer/Cart";
 
-import Dashboard from "./pages/admin/DashBoard"; 
+import Dashboard from "./pages/admin/DashBoard";
 import CustomerManager from "./pages/admin/CustomerManager";
 import AdminProfile from "./pages/admin/Profile";
 
@@ -25,7 +25,8 @@ export default function App() {
           <Route index element={<Home />} />
           <Route path="login" element={<Login />} />
           <Route path="register" element={<Register />} />
-          <Route path="cart" element={<Cart />} /> 
+          <Route path="cart" element={<Cart />} />
+          <Route path="profile" element={<CustomerProfile />} />
         </Route>
 
         <Route
