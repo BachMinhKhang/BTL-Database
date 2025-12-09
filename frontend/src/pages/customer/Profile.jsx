@@ -193,7 +193,6 @@ export default function Profile() {
               label="Username"
               value={form.username}
               onChange={onChange("username")}
-              disabled={true} // Không cho sửa username
             />
             <Field
               label="Email"

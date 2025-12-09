@@ -189,7 +189,6 @@ export default function EmployeeProfile() {
               label="Tên đăng nhập"
               value={form.username}
               onChange={onChange("username")}
-              disabled={true} // Không cho sửa
             />
 
             {/* Chức vụ thường không cho nhân viên tự sửa, chỉ Admin hoặc Manager sửa */}
