@@ -1,13 +1,20 @@
+USE master; 
+GO
+
 IF EXISTS (
     SELECT name 
     FROM master.sys.databases 
     WHERE name = N'BTL2'
 )
 BEGIN
+    ALTER DATABASE [BTL2] SET SINGLE_USER WITH ROLLBACK IMMEDIATE;
+    
     DROP DATABASE [BTL2];
 END
 
 CREATE DATABASE [BTL2];
+GO
+
 USE [BTL2];
 GO
 
