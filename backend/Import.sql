@@ -9,19 +9,33 @@ GO
 SET IDENTITY_INSERT [USER] ON;
 INSERT INTO [USER](UserID, username, email, password, phoneNo, fullName, firstName, lastName, district, province, numAndStreet)
 VALUES
--- KHÁCH HÀNG
+-- KHÁCH HÀNG (Giữ nguyên)
 (1,'khach_tung','tung.nguyen@gmail.com','pass123','0912345678',N'Nguyễn Thanh Tùng',N'Tùng',N'Nguyễn Thanh',N'Quận 1',N'TP.HCM',N'12 Lê Lợi'),
 (2,'khach_hoa','hoa.tran@gmail.com','pass123','0987654321',N'Trần Thị Hoa',N'Hoa',N'Trần Thị',N'Quận 3',N'TP.HCM',N'34 Nguyễn Trãi'),
 (3,'khach_binh','binh.le@gmail.com','pass123','0909123123',N'Lê Văn Bình',N'Bình',N'Lê Văn',N'Quận 7',N'TP.HCM',N'56 Võ Văn Kiệt'),
 (4,'khach_lan','lan.pham@gmail.com','pass123','0911223344',N'Phạm Ngọc Lan',N'Lan',N'Phạm Ngọc',N'Quận 2',N'TP.HCM',N'78 Thảo Điền'),
 (5,'khach_cuong','cuong.hoang@gmail.com','pass123','0900111222',N'Hoàng Quốc Cường',N'Cường',N'Hoàng Quốc',N'Quận 5',N'TP.HCM',N'90 Nguyễn Chí Thanh'),
 
--- NHÂN VIÊN
-(6,'nv_banhang','sales@shop.com','staff123','0900222333',N'Phan Văn Sales',N'Sales',N'Phan Văn',N'Quận 1',N'TP.HCM',N'Văn phòng Cty'),
-(7,'nv_quanly','manager@shop.com','manager123','0900333444',N'Lý Giám Đốc',N'Đốc',N'Lý Giám',N'Quận 1',N'TP.HCM',N'Văn phòng Cty'),
-(8,'nv_kho','stock@shop.com','staff123','0900444555',N'Trương Thủ Kho',N'Kho',N'Trương Thủ',N'Thủ Đức',N'TP.HCM',N'Kho tổng'),
-(9,'nv_marketing','mkt@shop.com','staff123','0900999888',N'Vũ Marketing',N'Marketing',N'Vũ',N'Quận 3',N'TP.HCM',N'Team MKT'),
-(10,'nv_it','it@shop.com','staff123','0900555666',N'Nguyễn Công IT',N'IT',N'Nguyễn Công',N'Cầu Giấy',N'TP.HCM',N'Phòng IT');
+-- NHÂN VIÊN (Đã sửa tên cho có ý nghĩa thực tế)
+(6, 'pm_khoi', 'productmgr@shop.com', 'pm1234', '0900222333',
+ N'Phan Minh Khôi', N'Khôi', N'Phan Minh', 
+ N'Quận 1', N'TP.HCM', N'12 Nguyễn Huệ'),
+
+(7, 'om_dat', 'ordermgr@shop.com', 'om1234', '0900333444',
+ N'Lý Văn Đạt', N'Đạt', N'Lý Văn',
+ N'Quận 3', N'TP.HCM', N'45 Võ Thị Sáu'),
+
+(8, 'cm_bao', 'couponmgr@shop.com', 'cm1234', '0900444555',
+ N'Trương Quốc Bảo', N'Bảo', N'Trương Quốc',
+ N'Thủ Đức', N'TP.HCM', N'88 Phạm Văn Đồng'),
+
+(9, 'staff_linh', 'marketing@shop.com', 'staff123', '0900999888',
+ N'Vũ Nhật Linh', N'Linh', N'Vũ Nhật',
+ N'Quận 10', N'TP.HCM', N'102 Lý Thái Tổ'),
+
+(10, 'staff_tuan', 'it_support@shop.com', 'staff123', '0900555666',
+ N'Nguyễn An Tuấn', N'Tuấn', N'Nguyễn An',
+ N'Bình Thạnh', N'TP.HCM', N'27 Điện Biên Phủ');
 
 SET IDENTITY_INSERT [USER] OFF;
 GO
@@ -31,7 +45,13 @@ INSERT INTO CUSTOMER(UserID, loyaltyPoint) VALUES (1, 150), (2, 50), (3, 300), (
 GO
 
 /* ---- 2.3 Insert EMPLOYEE ---- */
-INSERT INTO EMPLOYEE(UserID, role) VALUES (6, 'Sales'), (7, 'Manager'), (8, 'Logistics'), (9, 'Marketing'), (10, 'IT');
+INSERT INTO EMPLOYEE(UserID, role)
+VALUES
+    (6,  'ProductMgr'),
+    (7,  'OrderMgr'),
+    (8,  'CouponMgr'),
+    (9,  'ProductMgr'),
+    (10, 'OrderMgr');
 GO
 
 /* ---- 2.4 Insert CATALOGLIST (Danh mục VPP) ---- */
